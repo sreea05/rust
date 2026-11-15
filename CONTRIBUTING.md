@@ -1,8 +1,13 @@
 # {{project-name}} development guide
 
 This guide explains how this project is built, checked and released, and
-how to work on it. It covers every command, check, workflow and tool in the
-repository, what each one is for, and how to change it.
+how to work on it: every command, check, workflow and tool, what each is
+for, and how to change it.
+
+**How it fits together:** every tool is pinned inside one container image
+(the devcontainer), every check is a `just` command, and CI runs the same
+commands in the same image. A check that passes on your machine passes in
+CI, and any CI failure can be reproduced with one command.
 
 **Contents**
 
@@ -62,6 +67,13 @@ just ci
 Versions that differ from `tools.toml` may give different results from CI.
 
 ## Making a change
+
+```mermaid
+flowchart LR
+    A[Branch from main] --> B[Change + just ci]
+    B --> C[Pull request:<br/>CI runs]
+    C --> D[Squash or rebase merge:<br/>CI runs on main]
+```
 
 1. **Create a branch** from an up-to-date `main`. `main` itself only accepts
    pull requests (see [The protected `main` branch](#the-protected-main-branch)).
@@ -315,6 +327,22 @@ can be reproduced locally by running that command in the devcontainer.
 | **Release** (`release-plz.yml`) | A `release/*` branch is created; its pull request is merged | Prepare release PR; publish release |
 | **Devcontainer image** (`devcontainer.yml`) | Called by the workflows above | Builds or reuses the image |
 
+```mermaid
+flowchart LR
+    E[Pull request or<br/>merge to main] --> I[Image job:<br/>reuse or build,<br/>pin by digest]
+    I --> A[lint]
+    I --> B[test]
+    I --> C[msrv]
+    I --> D[hack]
+    I --> F[doc]
+    I --> G[deny]
+    I --> H[coverage]
+    I --> S["semver<br/>(pull requests)"]
+```
+
+Each check is a separate job, so a failure names exactly which check
+failed.
+
 ### How the image is shared between jobs
 
 Each workflow first calls `devcontainer.yml`, which:
@@ -372,6 +400,22 @@ accurate.
 Releases are handled by [release-plz](https://release-plz.dev) and only
 happen when you start one. Merging ordinary pull requests never releases
 anything.
+
+```mermaid
+sequenceDiagram
+    actor You
+    participant GH as GitHub
+    participant RP as Release workflow
+    participant CR as crates.io
+    You->>GH: push release/next (from main)
+    GH->>RP: branch created
+    RP->>GH: version bump + changelog,<br/>release PR (as the release bot)
+    GH->>GH: CI checks the PR
+    You->>GH: merge the PR
+    GH->>RP: release PR merged
+    RP->>GH: tag + GitHub release
+    RP->>CR: publish
+```
 
 ### Making a release
 
