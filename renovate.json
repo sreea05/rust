@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":maintainLockFilesWeekly",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "labels": ["dependencies"],
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "14 days",
+  "packageRules": [
+    {
+      "description": "One PR for all GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "One PR for the devcontainer tool versions and base image",
+      "matchFileNames": [".devcontainer/**"],
+      "groupName": "devcontainer"
+    },
+    {
+      "description": "Stable Rust toolchain bumps",
+      "matchFileNames": ["rust-toolchain.toml"],
+      "groupName": "Rust toolchain",
+      "minimumReleaseAge": "0 days"
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Tool versions annotated with `# renovate:` comments",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.devcontainer/tools\\.toml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[a-z0-9-]+ = \"(?<currentValue>[^\"]+)\""
+      ]
+    },
+    {
+      "description": "Pinned stable toolchain",
+      "customType": "regex",
+      "managerFilePatterns": ["/^rust-toolchain\\.toml$/"],
+      "matchStrings": ["channel = \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
+      "depNameTemplate": "rust-lang/rust",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
