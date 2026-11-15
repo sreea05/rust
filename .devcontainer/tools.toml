@@ -13,6 +13,9 @@ nightly-components = "rust-src{% if uses_unsafe %} miri{% endif %}"
 cargo-binstall = "1.26.2"
 # renovate: datasource=github-releases depName=evilmartians/lefthook
 lefthook = "2.2.2"
+# Prebuilt from GitHub: cargo-binstall has no binary for taplo-cli.
+# renovate: datasource=github-releases depName=tamasfe/taplo
+taplo = "0.10.0"
 
 # Installed with `cargo binstall <name>@<version>`.
 [crates]
@@ -30,8 +33,6 @@ cargo-hack = "0.6.46"
 cargo-semver-checks = "0.51.0"
 # renovate: datasource=crate depName=typos-cli
 typos-cli = "1.51.1"
-# renovate: datasource=crate depName=taplo-cli
-taplo-cli = "0.10.0"
 # renovate: datasource=crate depName=zizmor
 zizmor = "1.31.1"
 {% if fuzzing -%}
