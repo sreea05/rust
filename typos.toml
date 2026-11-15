@@ -2,5 +2,6 @@
 extend-exclude = ["CHANGELOG.md", "Cargo.lock", "fuzz/corpus/**", "fuzz/artifacts/**"]
 
 [default.extend-words]
-# Add project-specific words that typos flags incorrectly, e.g.:
+# Words typos wrongly flags as misspelled, e.g.:
+
 # ser = "ser"

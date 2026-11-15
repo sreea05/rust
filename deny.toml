@@ -4,13 +4,14 @@
 all-features = true
 
 [advisories]
-# Fail on any vulnerability, unmaintained or unsound advisory, and on
-# yanked crates. Ignore specific advisories here with a reason.
+# Fail on vulnerable, unmaintained, unsound or yanked crates.
+# To accept an advisory, add its ID to `ignore` with a reason.
 yanked = "deny"
 ignore = []
 
 [licenses]
-# Licenses compatible with distributing an MIT-licensed library.
+# Permissive licenses compatible with an MIT library.
+
 allow = [
   "MIT",
   "MIT-0",

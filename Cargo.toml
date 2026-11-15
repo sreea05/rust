@@ -2,8 +2,8 @@
 name = "{{project-name}}"
 version = "0.1.0"
 edition = "2024"
-# MSRV policy: support roughly the last six months of stable releases
-# (about stable minus 4). Bumping it is a minor-version change.
+# MSRV: about the last six months of stable Rust (stable minus 4).
+# Raising it is a minor-version change.
 rust-version = "1.96"
 description = "{{description}}"
 authors = ["{{authors}}"]
@@ -29,8 +29,9 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [lints.rust]
 {% if uses_unsafe -%}
-# Unsafe is allowed only where a module opts in with `#[allow(unsafe_code)]`,
-# so every unsafe region is explicit and easy to find in review.
+# Modules that need unsafe opt in with `#[allow(unsafe_code)]`,
+# so unsafe code is always easy to find.
+
 unsafe_code = "deny"
 unsafe_op_in_unsafe_fn = "deny"
 {% else -%}
