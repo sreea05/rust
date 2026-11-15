@@ -1,23 +1,101 @@
-# Releases with release-plz (https://release-plz.dev):
-#  - release-pr: each push to main opens or updates a release PR that bumps
-#    the version and updates CHANGELOG.md.
-#  - release: merging that PR tags it, creates a GitHub release and
-#    publishes to crates.io (trusted publishing, no stored token).
+# Releases with release-plz (https://release-plz.dev), only when you ask:
+#  1. Create a branch named release/<anything> from main and push it.
+#     release-plz bumps the version and updates CHANGELOG.md on that branch,
+#     then opens a pull request into main.
+#  2. Merge that pull request (squash or rebase). release-plz tags the
+#     release, creates a GitHub release and publishes to crates.io using
+#     trusted publishing.
+# Ordinary merges to main never trigger a release.
 #
-# GitHub doesn't run CI on PRs opened with the default token. To fix that,
-# set the RELEASE_APP_CLIENT_ID variable and RELEASE_APP_PRIVATE_KEY secret
-# (see CONTRIBUTING.md) and the PR is opened by your release bot instead.
+# Needs the release bot (RELEASE_APP_CLIENT_ID variable and
+# RELEASE_APP_PRIVATE_KEY secret, see README): commits and pull requests made
+# with the default token don't trigger CI, so the release PR could never
+# pass its required checks.
 name: Release
 
 on:
-  push:
+  create:
+  pull_request:
+    types: [closed]
     branches: [main]
 
 permissions: {}
 
 jobs:
+  prepare:
+    name: Prepare release PR
+    if: github.event_name == 'create' && github.ref_type == 'branch' && startsWith(github.ref_name, 'release/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    concurrency:
+      group: release-${{ github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - name: Check the release bot is configured
+        env:
+          CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+        run: |
+          if [[ -z "$CLIENT_ID" ]]; then
+            echo "::error::Set up the release bot first (README → New repository checklist)."
+            exit 1
+          fi
+
+      - name: Create release bot token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Check out the release branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - name: Install release-plz
+        uses: taiki-e/install-action@68a389c788b2cd04016ce8c80ee23b80d2ab3d68 # v2.88.1
+        with:
+          tool: release-plz@0.4.2,cargo-semver-checks@0.51.0
+
+      - name: Bump version and update changelog
+        run: release-plz update
+
+      - name: Commit and open the release pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}
+          BRANCH: ${{ github.ref_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+          REPO: ${{ github.repository }}
+        run: |
+          if git diff --quiet; then
+            echo "::notice::Nothing to release: no changes since the last version."
+            exit 0
+          fi
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          git config user.name "$BOT[bot]"
+          git config user.email "$BOT[bot]@users.noreply.github.com"
+          git commit --all --message "chore(release): v$version"
+          git push "https://x-access-token:$GH_TOKEN@github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
+          gh pr create --repo "$REPO" --base "$BASE" --head "$BRANCH" \
+            --title "chore(release): v$version" \
+            --body "Releases v$version. Merging publishes it to crates.io; see CHANGELOG.md for what's included."
+
   release:
-    name: Release unpublished version
+    name: Publish release
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.merged
+      && startsWith(github.event.pull_request.head.ref, 'release/')
+      && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -25,65 +103,19 @@ jobs:
       pull-requests: read
       id-token: write # crates.io trusted publishing
     steps:
-      - name: Create release bot token
-        id: app-token
-        if: vars.RELEASE_APP_CLIENT_ID != ''
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
-      - name: Check out repository
+      - name: Check out the merged commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
           persist-credentials: false
 
       - name: Install Rust toolchain from rust-toolchain.toml
         run: rustup toolchain install
 
-      - name: Run release-plz release
+      - name: Tag, create GitHub release and publish to crates.io
         uses: release-plz/action@f67a7e724bdad4a0f6875f186060a0ca2770d76c # v0.5.147
         with:
           command: release
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
-
-  release-pr:
-    name: Open or update release PR
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: write
-      pull-requests: write
-    concurrency:
-      group: release-plz-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - name: Create release bot token
-        id: app-token
-        if: vars.RELEASE_APP_CLIENT_ID != ''
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Install Rust toolchain from rust-toolchain.toml
-        run: rustup toolchain install
-
-      - name: Run release-plz release-pr
-        uses: release-plz/action@f67a7e724bdad4a0f6875f186060a0ca2770d76c # v0.5.147
-        with:
-          command: release-pr
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

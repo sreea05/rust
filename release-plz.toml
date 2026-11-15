@@ -1,4 +1,6 @@
 # release-plz: https://release-plz.dev/docs/config
+# When release-plz runs is decided by .github/workflows/release-plz.yml:
+# only for release/* branches and when their pull request is merged.
 
 [workspace]
 # Update CHANGELOG.md from Conventional Commit messages.
@@ -7,6 +9,6 @@ changelog_update = true
 git_release_enable = true
 # Use cargo-semver-checks to detect API breaks when choosing the next version.
 semver_check = true
-# Publish only when a release PR is merged, never on ordinary pushes.
-release_always = false
-pr_labels = ["release"]
+# Publish any version not yet on crates.io. Safe because the workflow only
+# runs `release` after a release PR is merged.
+release_always = true
