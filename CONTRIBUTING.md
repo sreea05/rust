@@ -451,15 +451,10 @@ sequenceDiagram
 
 ### How the version is chosen
 
-Versions follow [Semantic Versioning](https://semver.org). Before 1.0, a
-breaking change bumps the minor number (0.1 → 0.2) and anything else bumps
-the patch number (0.1.0 → 0.1.1):
-
-| Commits since the last release include | 0.x version | 1.x and later |
-|---|---|---|
-| A breaking change (`feat!:`, `fix!:`, `BREAKING CHANGE:`) or an API break | minor | major |
-| `feat:` | patch | minor |
-| Only `fix:` and others | patch | patch |
+Versions follow [Semantic Versioning](https://semver.org). The biggest
+change among the commits since the last release decides the bump (see the
+table in [Commit messages](#commit-messages)); an API break found by
+cargo-semver-checks counts as a breaking change even if no commit says so.
 
 ### How publishing is authorised
 
@@ -573,12 +568,12 @@ optional scope, and a short description, e.g. `feat(parser): accept empty
 input`. release-plz uses them to choose the next version and to write the
 changelog:
 
-| Type | Use for | Version effect |
-|---|---|---|
-| `feat` | New functionality | minor (patch before 1.0) |
-| `fix` | Bug fixes | patch |
-| `feat!` / `fix!`, or a `BREAKING CHANGE:` footer | Changes that break users' code | major (minor before 1.0) |
-| `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style` | Everything else | none on their own |
+| Type | Use for | Bump before 1.0 | Bump from 1.0 |
+|---|---|---|---|
+| `feat!` / `fix!`, or a `BREAKING CHANGE:` footer | Changes that break users' code | minor (0.1 → 0.2) | major (1.0 → 2.0) |
+| `feat` | New functionality | patch (0.1.0 → 0.1.1) | minor (1.0 → 1.1) |
+| `fix` | Bug fixes | patch | patch |
+| `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `chore`, `style` | Everything else | none on their own | none on their own |
 
 With squash merges, the pull request title becomes the commit message, so
 give the title the right type.
