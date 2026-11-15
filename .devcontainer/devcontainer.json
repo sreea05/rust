@@ -1,0 +1,22 @@
+{
+  "name": "{{project-name}}",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "just setup",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "vadimcn.vscode-lldb",
+        "nefrob.vscode-just-syntax",
+        "tekumara.typos-vscode",
+        "github.vscode-github-actions",
+        "editorconfig.editorconfig"
+      ]
+    }
+  }
+}

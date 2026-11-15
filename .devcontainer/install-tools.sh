@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Installs the pinned toolchains and tools for the devcontainer image.
+# Usage: install-tools.sh <dir containing tools.toml, rust-toolchain.toml, Cargo.toml>
+set -euo pipefail
+
+src=${1:?usage: install-tools.sh <dir>}
+tools="$src/tools.toml"
+
+# value <section> <key>: read a string value from tools.toml.
+value() {
+    awk -v section="[$1]" -v key="$2" '
+        /^\[/ { in_section = ($0 == section); next }
+        in_section && index($0, key " = ") == 1 {
+            v = substr($0, length(key) + 4); gsub(/^"|"$/, "", v); print v; exit
+        }' "$tools"
+}
+
+# crate_specs: every `name = "version"` in [crates] as `name@version`.
+crate_specs() {
+    awk '
+        /^\[/ { in_section = ($0 == "[crates]"); next }
+        in_section && /^[a-z]/ { gsub(/"/, "", $3); print $1 "@" $3 }' "$tools"
+}
+
+arch=$(uname -m) # x86_64 or aarch64
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+install_toolchains() {
+    # Stable from rust-toolchain.toml, made the default outside the repo too.
+    (cd "$src" && rustup toolchain install)
+    local stable
+    stable=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$src/rust-toolchain.toml")
+    rustup default "$stable"
+
+    # MSRV from Cargo.toml.
+    local msrv
+    msrv=$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' "$src/Cargo.toml")
+    rustup toolchain install "$msrv" --profile minimal
+
+    # Nightly, for docs.rs-style docs and the optional Miri / fuzzing.
+    local nightly components
+    nightly=$(value rust nightly)
+    components=$(value rust nightly-components)
+    # shellcheck disable=SC2086 # word splitting is intended
+    rustup toolchain install "$nightly" --profile minimal --component $components
+}
+
+install_lefthook() {
+    local version base
+    version=$(value bootstrap lefthook)
+    base="https://github.com/evilmartians/lefthook/releases/download/v$version"
+    curl -fsSL -o "$tmp/lefthook_${version}_Linux_${arch}" "$base/lefthook_${version}_Linux_${arch}"
+    curl -fsSL -o "$tmp/checksums.txt" "$base/lefthook_checksums.txt"
+    (cd "$tmp" && grep " lefthook_${version}_Linux_${arch}\$" checksums.txt | sha256sum --check --strict)
+    install -m 0755 "$tmp/lefthook_${version}_Linux_${arch}" /usr/local/bin/lefthook
+}
+
+install_crates() {
+    local version
+    version=$(value bootstrap cargo-binstall)
+    curl -fsSL "https://github.com/cargo-bins/cargo-binstall/releases/download/v$version/cargo-binstall-$arch-unknown-linux-musl.tgz" |
+        tar -xz -C "$CARGO_HOME/bin"
+    # shellcheck disable=SC2046 # one argument per crate is intended
+    cargo binstall --no-confirm --locked --disable-telemetry $(crate_specs)
+}
+
+case "${2:-all}" in
+    toolchains) install_toolchains ;;
+    tools) install_lefthook && install_crates ;;
+    all) install_toolchains && install_lefthook && install_crates ;;
+    *) echo "unknown step: $2" >&2 && exit 1 ;;
+esac
