@@ -1,6 +1,6 @@
-# Short fuzzing run on every push and PR, so new crashes surface early.
-# Longer campaigns are better run locally: `just fuzz 3600`.
-# Only present when the crate was generated with fuzzing enabled.
+# Short fuzzing run on every push and PR to catch new crashes early.
+# Run longer sessions locally, e.g. `just fuzz 3600`.
+
 name: Fuzz
 
 on:

@@ -1,19 +1,18 @@
-# Builds the devcontainer image and publishes it to GHCR, tagged by a hash
-# of everything that goes into it. Other workflows call this first and run
-# their jobs inside the resulting image. If the tag already exists the
-# build is skipped, so most runs only pull the cached image.
+# Builds the devcontainer image and pushes it to GitHub's container registry,
+# tagged with a hash of its inputs. Other workflows call this first and run
+# their jobs in the image. If the tag already exists, the build is skipped.
 name: Devcontainer image
 
 on:
   workflow_call:
     inputs:
       rebuild:
-        description: Rebuild without cache even if the tag exists (refreshes base packages).
+        description: Rebuild from scratch even if the image exists, to pick up base image updates.
         type: boolean
         default: false
     outputs:
       image:
-        description: Digest-pinned image reference to use as `container.image`.
+        description: Image reference pinned by digest, for `container.image`.
         value: ${{ jobs.image.outputs.image }}
 
 permissions: {}
@@ -64,8 +63,8 @@ jobs:
         if: steps.exists.outputs.exists != 'true'
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      # Pull requests from forks can't push to this repository's registry;
-      # their CI works as long as the devcontainer files are unchanged.
+      # Fork PRs can't push here, so their CI fails if they change the
+      # devcontainer files; otherwise they reuse the existing image.
       - name: Build and push image
         if: steps.exists.outputs.exists != 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -78,7 +77,8 @@ jobs:
           no-cache: ${{ inputs.rebuild }}
           secrets: github_token=${{ secrets.GITHUB_TOKEN }}
 
-      # Jobs run the exact image built or found above, even if the tag moves.
+      # Jobs then run this exact image, even if the tag is later overwritten.
+
       - name: Pin image by digest
         id: pin
         env:
