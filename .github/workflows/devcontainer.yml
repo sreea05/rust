@@ -13,7 +13,7 @@ on:
         default: false
     outputs:
       image:
-        description: Image reference to use as `container.image`.
+        description: Digest-pinned image reference to use as `container.image`.
         value: ${{ jobs.image.outputs.image }}
 
 permissions: {}
@@ -26,7 +26,7 @@ jobs:
       contents: read
       packages: write
     outputs:
-      image: ${{ steps.ref.outputs.image }}
+      image: ${{ steps.pin.outputs.image }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -77,3 +77,12 @@ jobs:
           labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           no-cache: ${{ inputs.rebuild }}
           secrets: github_token=${{ secrets.GITHUB_TOKEN }}
+
+      # Jobs run the exact image built or found above, even if the tag moves.
+      - name: Pin image by digest
+        id: pin
+        env:
+          IMAGE: ${{ steps.ref.outputs.image }}
+        run: |
+          digest=$(docker buildx imagetools inspect "$IMAGE" --format '{{.Manifest.Digest}}')
+          echo "image=$IMAGE@$digest" >> "$GITHUB_OUTPUT"
