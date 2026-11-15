@@ -29,23 +29,21 @@ Then follow **One-time maintainer setup** in the generated `CONTRIBUTING.md`.
 
 ## What's included
 
-- **Crate:** edition 2024, MSRV 1.96 (about stable minus 4), strict lints in
-  `[lints]` (clippy pedantic, `missing_docs`, ...), docs.rs metadata.
-- **Formatting and linting:** rustfmt, clippy, taplo (TOML), typos, editorconfig.
-- **Tests:** cargo-nextest, doctests, coverage with cargo-llvm-cov,
-  feature combinations with cargo-hack, MSRV build.
-- **Supply chain:** cargo-deny (licenses, advisories, sources), Renovate.
-- **API:** cargo-semver-checks on PRs and in release-plz.
-- **Developer workflow:** `justfile` with a recipe for every check, lefthook
-  pre-commit hooks, VS Code settings, and a devcontainer.
-- **CI (Linux):** every job runs in the devcontainer image (built once and
-  cached in GHCR) and calls one `just` recipe; plus a weekly run on beta,
-  nightly and the newest dependencies.
+- **Crate:** edition 2024, MSRV 1.96 (about stable minus 4), strict lints,
+  docs.rs metadata.
+- **Checks:** formatting, linting, spelling, tests, coverage, MSRV, feature
+  combinations, dependency audit, breaking-API detection, workflow security.
+- **Developer workflow:** a `justfile` command for every check, pre-commit
+  hooks, VS Code settings, and a devcontainer.
+- **CI (Linux):** every job runs in the devcontainer image and calls one
+  `just` command; plus a weekly run on beta, nightly and the newest dependencies.
+- **Dependency updates:** Renovate.
 - **Releases:** release-plz release PRs, changelog from Conventional Commits,
   crates.io trusted publishing, optional GitHub App release bot.
 
-Tool versions are pinned in `.devcontainer/tools.toml`, toolchains in
-`rust-toolchain.toml`, and GitHub Actions by commit SHA.
+Each tool and what it's for is listed under **Tools** in
+[CONTRIBUTING.md](CONTRIBUTING.md#tools).
+
 
 ## Working on the template itself
 
