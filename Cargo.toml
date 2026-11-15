@@ -59,3 +59,10 @@ missing_safety_doc = "deny"
 [dependencies]
 
 [dev-dependencies]
+{% if benchmarks -%}
+criterion = "0.8.2"
+
+[[bench]]
+name = "checked_add"
+harness = false
+{% endif -%}
