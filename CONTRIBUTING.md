@@ -66,12 +66,12 @@ failure can be reproduced locally with the same command.
 
 | Workflow | When | What it does |
 |---|---|---|
-| CI | Every push to `main` and every PR | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on PRs also `semver` |
+| CI | Every PR and every merge to `main` | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on PRs also `semver` |
 {%- if uses_unsafe %}
-| Miri | Every push to `main` and every PR | Tests under Miri |
+| Miri | Every PR and every merge to `main` | Tests under Miri |
 {%- endif %}
 {%- if fuzzing %}
-| Fuzz | Every push to `main` and every PR | Each fuzz target for 60 s; crash inputs are uploaded as an artifact |
+| Fuzz | Every PR and every merge to `main` | Each fuzz target for 60 s; crash inputs are uploaded as an artifact |
 {%- endif %}
 | Scheduled | Mondays | Rebuilds the image from scratch, tests on beta and nightly and with the newest dependencies, re-checks advisories |
 | Release | A `release/*` branch is created, and its PR is merged | See [Releases](#releases) |

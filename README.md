@@ -25,9 +25,10 @@ so whatever passes on your machine passes in CI.
   runs them all, exactly as CI does.
 - **Devcontainer:** every toolchain and tool at pinned versions, used both
   locally and by CI.
-- **Automation:** CI on every push and PR, a weekly run against new Rust and
-  dependency releases, Renovate update PRs, and releases to crates.io by
-  merging a release PR.
+- **Automation:** CI on every pull request and merge, a protected `main`
+  (squash or rebase merges only), a weekly run against new Rust and
+  dependency releases, Renovate update PRs, and releases to crates.io
+  started by pushing a `release/*` branch.
 - **Optional extras:** Miri for `unsafe` code, fuzzing, benchmarks, Codecov.
 
 ## Getting started
