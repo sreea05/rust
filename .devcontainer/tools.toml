@@ -1,0 +1,40 @@
+# Pinned versions of every tool baked into the devcontainer image. CI runs
+# inside that image, so this file is the single source of truth for both
+# local development and CI. Renovate updates the versions via the
+# `# renovate:` annotations.
+
+[rust]
+# Nightly is used for docs.rs-style docs{% if uses_unsafe %}, Miri{% endif %}{% if fuzzing %}, fuzzing{% endif %}.
+nightly = "nightly-2026-10-31"
+nightly-components = "rust-src{% if uses_unsafe %} miri{% endif %}"
+
+[bootstrap]
+# renovate: datasource=github-releases depName=cargo-bins/cargo-binstall
+cargo-binstall = "1.26.2"
+# renovate: datasource=github-releases depName=evilmartians/lefthook
+lefthook = "2.2.2"
+
+# Installed with `cargo binstall <name>@<version>`.
+[crates]
+# renovate: datasource=crate depName=just
+just = "1.59.0"
+# renovate: datasource=crate depName=cargo-nextest
+cargo-nextest = "0.9.150"
+# renovate: datasource=crate depName=cargo-llvm-cov
+cargo-llvm-cov = "0.9.1"
+# renovate: datasource=crate depName=cargo-deny
+cargo-deny = "0.20.2"
+# renovate: datasource=crate depName=cargo-hack
+cargo-hack = "0.6.46"
+# renovate: datasource=crate depName=cargo-semver-checks
+cargo-semver-checks = "0.51.0"
+# renovate: datasource=crate depName=typos-cli
+typos-cli = "1.51.1"
+# renovate: datasource=crate depName=taplo-cli
+taplo-cli = "0.10.0"
+# renovate: datasource=crate depName=zizmor
+zizmor = "1.31.1"
+{% if fuzzing -%}
+# renovate: datasource=crate depName=cargo-fuzz
+cargo-fuzz = "0.13.2"
+{% endif -%}
