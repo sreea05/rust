@@ -54,8 +54,7 @@ print_stderr = "warn"
 undocumented_unsafe_blocks = "deny"
 multiple_unsafe_ops_per_block = "deny"
 missing_safety_doc = "deny"
-{% endif -%}
-
+{% endif %}
 [dependencies]
 
 [dev-dependencies]
