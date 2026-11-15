@@ -102,32 +102,40 @@ reuse it.
 
 ### 5. Release
 
-When you're ready for a first release, follow
-[Before the first release](#before-the-first-release). After that,
-releasing is just merging a PR (see below).
+Publish the first version by hand, as described in
+[Before the first release](#before-the-first-release). After that, every
+release starts with a `release/*` branch (see below).
 
 ## Day-to-day workflow
 
 ```mermaid
 flowchart LR
-    A[Change code] --> B[just ci]
-    B --> C[Commit<br/>feat: / fix: ...]
-    C --> D[Pull request<br/>CI runs]
-    D --> E[Merge to main]
-    E --> F[release-plz updates<br/>the release PR]
-    F --> G[Merge release PR]
-    G --> H[Published to<br/>crates.io]
+    subgraph Change
+        A[Branch from main] --> B[Code + just ci]
+        B --> C[Pull request<br/>CI runs]
+        C --> D[Squash or rebase<br/>merge to main<br/>CI runs]
+    end
+    subgraph Release
+        E[Push a release/*<br/>branch from main] --> F[release-plz opens<br/>release PR]
+        F --> G[Merge it]
+        G --> H[Tagged, GitHub release,<br/>published to crates.io]
+    end
+    D -. when you're ready .-> E
 ```
 
-1. **Change the code** and run `just ci`. The git hook checks formatting and
-   spelling on every commit.
+1. **Work on a branch,** never on `main`: `main` only accepts pull
+   requests. Run `just ci` before pushing; the git hook checks formatting
+   and spelling on every commit.
 2. **Write commit messages** as [Conventional Commits](https://www.conventionalcommits.org/)
    (`feat: ...`, `fix: ...`). They decide the next version number and
    become the changelog.
 3. **Open a pull request.** CI runs every check in the devcontainer image.
-4. **Merge.** release-plz keeps a release PR open with the next version
-   and changelog. Merge it whenever you want to release; it publishes to
-   crates.io and creates a GitHub release.
+   Merge with **squash** or **rebase** once it passes (merge commits are
+   blocked); CI runs again on `main`.
+4. **Release when you choose:** push a branch named `release/<anything>`
+   from `main`. release-plz bumps the version, updates the changelog and
+   opens a release PR. Merging it publishes to crates.io and creates a
+   GitHub release. Ordinary merges never release.
 5. **Dependency updates** arrive as Renovate PRs on Monday mornings. Review
    and merge them like any other PR.
 
@@ -135,10 +143,11 @@ flowchart LR
 
 ### Once, before your first crate
 
-- [ ] **Create the release bot** (optional, recommended). GitHub doesn't run
-  CI on pull requests opened by a workflow's built-in token, so release PRs
-  would show no checks. A GitHub App (a bot account you own) avoids that,
-  and one app serves all your repositories:
+- [ ] **Create the release bot** (required for releases). GitHub doesn't
+  run CI on commits and pull requests made by a workflow's built-in token,
+  so a release PR could never pass the checks `main` requires. A GitHub App
+  (a bot account you own) avoids that, and one app serves all your
+  repositories:
   1. GitHub → your profile → *Settings* → *Developer settings* →
      *GitHub Apps* → *New GitHub App*.
   2. Name it (e.g. `sreea05-release-bot`), set any homepage URL, and untick
@@ -172,30 +181,29 @@ flowchart LR
   *Secrets and variables* → *Actions* add:
   - the **variable** `RELEASE_APP_CLIENT_ID` with the Client ID;
   - the **secret** `RELEASE_APP_PRIVATE_KEY` with the whole `.pem` file.
-- [ ] **Protect `main`:** repository → *Settings* → *Rules* → new branch
-  ruleset requiring pull requests and the status checks `lint`, `test`,
-  `msrv`, `hack`, `doc`, `deny`, `coverage`, plus `miri` and `fuzz` if
-  enabled. Don't require `semver`
-  ([why](CONTRIBUTING.md#commit-messages)).
+- [ ] **Protect `main`:** repository → *Settings* → *Rules* → *Rulesets* →
+  *New ruleset* → *Import a ruleset* → choose `.github/rulesets/main.json`
+  → *Create*. This blocks direct pushes, allows only squash and rebase
+  merges of pull requests, and requires CI to pass.
+- [ ] **Tidy the merge settings:** repository → *Settings* → *General* →
+  *Pull Requests*: untick *Allow merge commits* (the ruleset blocks them
+  anyway) and tick *Automatically delete head branches*, so merged and
+  release branches are cleaned up.
 - [ ] **Connect Codecov** (if enabled): sign in at <https://codecov.io> with
   GitHub, add the repository, and save its upload token as the repository
   secret `CODECOV_TOKEN`. Until then the upload step is skipped.
 
 ### Before the first release
 
-- [ ] **Don't merge the first release PR yet.** release-plz opens one for
-  `0.1.0` after your first push, but publishing from CI only works for
-  crates that already exist on crates.io, so merging it now fails. Do the
-  next two steps first; release-plz refreshes the PR on the next push to
-  `main`.
-- [ ] **Publish the first version by hand.** crates.io only allows
-  token-free publishing for crates that already exist:
+- [ ] **Publish the first version by hand.** Publishing from CI only works
+  for crates that already exist on crates.io. From an up-to-date `main`:
   `cargo login` (token from <https://crates.io/settings/tokens>), then
   `cargo publish`.
 - [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
   *Trusted Publishing* → *Add*: your GitHub owner and repository name,
   workflow `release-plz.yml`, environment empty. From then on, releases
-  happen by merging release PRs.
+  start with a `release/*` branch
+  ([how](CONTRIBUTING.md#releases)).
 
 ## Where to find what
 
