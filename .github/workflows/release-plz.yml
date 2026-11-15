@@ -1,0 +1,84 @@
+# Releases with release-plz (https://release-plz.dev):
+#  - release-pr: on every push to main, opens or updates a "chore: release"
+#    PR that bumps the version and updates CHANGELOG.md.
+#  - release: when that PR is merged, tags the commit, creates a GitHub
+#    release and publishes to crates.io via trusted publishing (no token).
+#
+# Optional release bot: PRs opened with the default GITHUB_TOKEN don't
+# trigger CI. Set the RELEASE_APP_CLIENT_ID variable and the
+# RELEASE_APP_PRIVATE_KEY secret (see README) to open them as a GitHub App
+# instead, so CI runs on release PRs. Without them, GITHUB_TOKEN is used.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release:
+    name: Release unpublished version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      id-token: write # crates.io trusted publishing
+    steps:
+      - name: Create release bot token
+        id: app-token
+        if: vars.RELEASE_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - name: Run release-plz release
+        uses: release-plz/action@f67a7e724bdad4a0f6875f186060a0ca2770d76c # v0.5.147
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+  release-pr:
+    name: Open or update release PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Create release bot token
+        id: app-token
+        if: vars.RELEASE_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - name: Run release-plz release-pr
+        uses: release-plz/action@f67a7e724bdad4a0f6875f186060a0ca2770d76c # v0.5.147
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
