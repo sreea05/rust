@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs the pinned toolchains and tools into the devcontainer image.
-# Usage: install-tools.sh <dir> <toolchains|tools|msrv|all>
+# Usage: install-tools.sh <dir> <rustup|toolchains|tools|msrv|all>
 # <dir> contains tools.toml, rust-toolchain.toml and (for msrv) Cargo.toml.
 set -euo pipefail
 
@@ -26,6 +26,17 @@ crate_specs() {
 arch=$(uname -m) # x86_64 or aarch64
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
+
+install_rustup() {
+    local version base
+    version=$(value bootstrap rustup)
+    base="https://static.rust-lang.org/rustup/archive/$version/$arch-unknown-linux-gnu"
+    curl -fsSL -o "$tmp/rustup-init" "$base/rustup-init"
+    curl -fsSL -o "$tmp/rustup-init.sha256" "$base/rustup-init.sha256"
+    echo "$(cut -d ' ' -f 1 "$tmp/rustup-init.sha256")  $tmp/rustup-init" | sha256sum --check --strict
+    chmod +x "$tmp/rustup-init"
+    "$tmp/rustup-init" -y --no-modify-path --profile minimal --default-toolchain none
+}
 
 install_toolchains() {
     # Stable from rust-toolchain.toml; also the default outside the repo.
@@ -78,9 +89,10 @@ install_crates() {
 }
 
 case "${2:-all}" in
+    rustup) install_rustup ;;
     toolchains) install_toolchains ;;
     tools) install_lefthook && install_taplo && install_crates ;;
     msrv) install_msrv ;;
-    all) install_toolchains && install_lefthook && install_taplo && install_crates && install_msrv ;;
+    all) install_rustup && install_toolchains && install_lefthook && install_taplo && install_crates && install_msrv ;;
     *) echo "unknown step: $2" >&2 && exit 1 ;;
 esac

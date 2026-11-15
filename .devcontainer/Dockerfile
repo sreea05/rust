@@ -13,13 +13,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --no-modify-path --profile minimal --default-toolchain none
-
 # Layers go from least to most often changed, so rebuilds reuse the cache.
-# 1) Stable and nightly toolchains.
+# 1) rustup (pinned and checksum-verified), then stable and nightly.
 COPY .devcontainer/install-tools.sh .devcontainer/tools.toml rust-toolchain.toml /tmp/build/
-RUN /tmp/build/install-tools.sh /tmp/build toolchains
+RUN /tmp/build/install-tools.sh /tmp/build rustup \
+    && /tmp/build/install-tools.sh /tmp/build toolchains
 
 # 2) Tools. The optional github_token secret avoids GitHub API rate limits;
 # without it some tools may be compiled from source, which is slower.
