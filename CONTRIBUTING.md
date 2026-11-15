@@ -5,8 +5,8 @@ every change must pass, and how releases work.
 
 ## Development environment
 
-The easiest setup is the **devcontainer**: it has the pinned Rust
-toolchains and every tool CI uses, at the same versions.
+The easiest setup is the **devcontainer**, which has the same toolchains
+and tools as CI.
 
 - **VS Code:** install the Dev Containers extension, open the repository,
   and choose *Reopen in Container*.
@@ -15,10 +15,9 @@ toolchains and every tool CI uses, at the same versions.
 `just setup` runs automatically when the container is created. It creates
 `Cargo.lock` if it's missing and installs the git hooks.
 
-Working without the container is fine too: install Rust with
-[rustup](https://rustup.rs) (the toolchain in `rust-toolchain.toml` installs
-itself), then the tools listed in `.devcontainer/tools.toml`, and run
-`just setup`.
+Without the container: install Rust with [rustup](https://rustup.rs) (it
+picks up `rust-toolchain.toml` automatically), install the tools listed in
+`.devcontainer/tools.toml`, then run `just setup`.
 
 ## Everyday commands
 
@@ -72,10 +71,10 @@ Releases are automated with [release-plz](https://release-plz.dev):
 These steps are needed once per repository, after creating it from the template.
 
 1. **Push to GitHub.** The first CI run builds the devcontainer image and
-   stores it in the repository's GitHub Container Registry; nothing to configure.
-   If the repository is public, make the package public too (repository →
-   *Packages* → *devcontainer* → *Package settings* → *Change visibility*)
-   so pull requests from forks can pull it.
+   stores it in the repository's packages. For a public repository, make
+   that package public (repository → *Packages* → *devcontainer* →
+   *Package settings* → *Change visibility*) so PRs from forks can use it.
+
 
 2. **First publish by hand.** crates.io trusted publishing only works for
    crates that already exist, so publish the first version from your machine:
