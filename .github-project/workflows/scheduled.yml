@@ -60,3 +60,32 @@ jobs:
         env:
           COMMAND: ${{ matrix.command }}
         run: $COMMAND
+
+  # Each rebuild leaves the previous image untagged. Delete all but the
+  # newest few untagged versions so registry storage doesn't grow forever.
+  prune-images:
+    name: Prune old devcontainer images
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old untagged image versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          OWNER_TYPE: ${{ github.event.repository.owner.type }}
+          REPO: ${{ github.event.repository.name }}
+          KEEP: "5"
+        run: |
+          if [[ "$OWNER_TYPE" == "Organization" ]]; then scope="orgs/$OWNER"; else scope="users/$OWNER"; fi
+          package=$(jq -rn --arg p "${REPO,,}/devcontainer" '$p | @uri')
+          url="$scope/packages/container/$package/versions"
+          # Versions are listed newest first; keep the newest $KEEP untagged.
+          gh api --paginate "$url" --jq '.[] | select(.metadata.container.tags == []) | .id' |
+            tail -n "+$((KEEP + 1))" |
+            while read -r id; do
+              echo "Deleting version $id"
+              gh api --method DELETE "$url/$id"
+            done

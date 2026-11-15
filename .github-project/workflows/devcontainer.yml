@@ -77,6 +77,10 @@ jobs:
           labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           no-cache: ${{ inputs.rebuild }}
           secrets: github_token=${{ secrets.GITHUB_TOKEN }}
+          # One plain manifest per image. Attestations would add untagged
+          # manifests the image depends on, which the weekly prune would delete.
+          provenance: false
+          sbom: false
 
       # Jobs then run this exact image, even if the tag is later overwritten.
       - name: Pin image by digest
