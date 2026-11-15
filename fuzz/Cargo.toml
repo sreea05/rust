@@ -1,0 +1,22 @@
+[package]
+name = "{{project-name}}-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4.13"
+{{project-name}} = { path = ".." }
+
+[[bin]]
+name = "checked_add"
+path = "fuzz_targets/checked_add.rs"
+test = false
+doc = false
+bench = false
+
+# Standalone: the fuzz crate needs nightly and must not join the main build.
+[workspace]
