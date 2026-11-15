@@ -1,0 +1,118 @@
+# Every check CI runs is a recipe here; CI calls these same recipes.
+# Run `just` to list them.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+nightly := `sed -n 's/^nightly = "\(.*\)"$/\1/p' .devcontainer/tools.toml`
+msrv := `sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml`
+
+[private]
+default:
+    @just --list --unsorted
+
+# One-time setup after cloning: create Cargo.lock if missing, install git hooks.
+setup:
+    cargo fetch
+    lefthook install
+
+# Run everything CI runs on a pull request.
+ci: lint test msrv hack doc deny cov semver
+
+# --- Formatting and linting -------------------------------------------------
+
+# Format Rust and TOML files in place.
+fmt:
+    cargo fmt --all
+    taplo fmt
+
+# All lint checks: formatting, clippy, TOML, spelling, workflow audit.
+lint: fmt-check clippy toml-check typos zizmor
+
+# Check Rust formatting without changing files.
+fmt-check:
+    cargo fmt --all --check
+
+# Clippy on all targets and features; warnings are errors.
+clippy:
+    cargo clippy --locked --all-targets --all-features -- -D warnings
+
+# Check TOML formatting without changing files.
+toml-check:
+    taplo fmt --check
+
+# Spell-check the repository.
+typos:
+    typos
+
+# Audit GitHub Actions workflows for security problems.
+zizmor:
+    zizmor --offline .github/workflows
+
+# --- Tests ------------------------------------------------------------------
+
+# Unit, integration and doc tests. Set NEXTEST_PROFILE=ci for CI output.
+test:
+    cargo nextest run --locked --all-features --no-tests=warn
+    cargo test --locked --all-features --doc
+
+# Check that the library builds on the minimum supported Rust version.
+msrv:
+    rustup toolchain install {{ msrv }} --profile minimal --no-self-update
+    cargo +{{ msrv }} check --locked --all-features --lib
+
+# Check every combination of feature flags.
+hack:
+    cargo hack check --locked --feature-powerset --all-targets
+
+# Test with coverage; writes target/lcov.info and prints a summary.
+cov:
+    cargo llvm-cov nextest --locked --all-features --no-tests=warn --lcov --output-path target/lcov.info
+    cargo llvm-cov report --summary-only | tee target/coverage-summary.txt
+
+# Update Cargo.lock to the newest compatible dependencies, then test.
+test-latest:
+    cargo update
+    just test
+
+# Run tests on another toolchain, e.g. `just test-toolchain beta`.
+test-toolchain toolchain:
+    rustup toolchain install {{ toolchain }} --profile minimal --no-self-update
+    cargo +{{ toolchain }} test --locked --all-features
+
+# --- Docs, dependencies, API ------------------------------------------------
+
+# Build docs exactly as docs.rs does (nightly, --cfg docsrs); warnings are errors.
+doc:
+    RUSTDOCFLAGS="--cfg docsrs -D warnings" cargo +{{ nightly }} doc --locked --no-deps --all-features
+
+# Build docs and open them in a browser.
+doc-open:
+    RUSTDOCFLAGS="--cfg docsrs" cargo +{{ nightly }} doc --locked --no-deps --all-features --open
+
+# Check dependency licenses, advisories, bans and sources.
+deny:
+    cargo deny --locked check
+
+# Report breaking public-API changes compared with a git ref.
+semver baseline="origin/main":
+    if git rev-parse --verify --quiet "{{ baseline }}^{commit}" >/dev/null; then \
+        cargo semver-checks --baseline-rev "{{ baseline }}"; \
+    else \
+        echo "semver: baseline '{{ baseline }}' not found, skipping"; \
+    fi
+
+# --- Optional extras --------------------------------------------------------
+
+# Run the test suite under Miri to detect undefined behaviour.
+miri:
+    cargo +{{ nightly }} miri test --all-features
+
+# Run each fuzz target for the given number of seconds.
+fuzz seconds="60":
+    for target in $(cargo +{{ nightly }} fuzz list); do \
+        cargo +{{ nightly }} fuzz run "$target" -- -max_total_time={{ seconds }}; \
+    done
+
+# Run benchmarks; extra arguments go to criterion, e.g. `just bench -- --save-baseline main`.
+bench *args:
+    cargo bench --locked --all-features {{ args }}
