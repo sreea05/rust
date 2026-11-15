@@ -8,6 +8,8 @@ nightly = "nightly-2026-10-31"
 nightly-components = "rust-src{% if uses_unsafe %} miri{% endif %}"
 
 [bootstrap]
+# renovate: datasource=github-releases depName=rust-lang/rustup
+rustup = "1.29.2"
 # renovate: datasource=github-releases depName=cargo-bins/cargo-binstall
 cargo-binstall = "1.26.2"
 # renovate: datasource=github-releases depName=evilmartians/lefthook
