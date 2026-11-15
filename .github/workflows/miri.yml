@@ -1,0 +1,45 @@
+# Runs the test suite under Miri to catch undefined behaviour in unsafe
+# code. Only present when the crate was generated with unsafe enabled.
+name: Miri
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  image:
+    name: Devcontainer image
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/devcontainer.yml
+
+  miri:
+    name: miri
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run just miri
+        run: just miri
