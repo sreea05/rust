@@ -1,0 +1,47 @@
+[template]
+cargo_generate_version = ">=0.23.0"
+# Copied verbatim, never run through Liquid: these files use `{{ }}` for
+# their own syntax (GitHub Actions expressions, just and Tera templates).
+exclude = [".github/workflows/**", "justfile", "release-plz.toml"]
+
+[placeholders.description]
+type = "string"
+prompt = "One-line description of the crate"
+default = "A Rust library"
+
+[placeholders.github_owner]
+type = "string"
+prompt = "GitHub user or organisation that will own the repository"
+default = "sreea05"
+
+[placeholders.uses_unsafe]
+type = "bool"
+prompt = "Will this crate contain `unsafe` code? (enables Miri)"
+default = false
+
+[placeholders.fuzzing]
+type = "bool"
+prompt = "Add cargo-fuzz fuzzing targets?"
+default = false
+
+[placeholders.benchmarks]
+type = "bool"
+prompt = "Add criterion benchmarks?"
+default = true
+
+[placeholders.codecov]
+type = "bool"
+prompt = "Upload coverage to Codecov?"
+default = false
+
+[conditional.'!uses_unsafe']
+ignore = [".github/workflows/miri.yml"]
+
+[conditional.'!fuzzing']
+ignore = ["fuzz", ".github/workflows/fuzz.yml"]
+
+[conditional.'!benchmarks']
+ignore = ["benches"]
+
+[conditional.'!codecov']
+ignore = ["codecov.yml"]
