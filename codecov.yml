@@ -1,5 +1,5 @@
 # Codecov: https://docs.codecov.com/docs/codecov-yaml
-# Only present when the crate was generated with Codecov enabled.
+
 coverage:
   status:
     project:

@@ -1,4 +1,5 @@
-# Stable-only options, so `cargo fmt` works on the pinned stable toolchain.
+# Stable options only, so formatting works without nightly.
+
 style_edition = "2024"
 newline_style = "Unix"
 use_field_init_shorthand = true

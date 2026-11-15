@@ -1,9 +1,10 @@
 [template]
 cargo_generate_version = ">=0.23.0"
-# Copied verbatim, never run through Liquid: these files use `{{ }}` for
-# their own syntax (GitHub Actions expressions, just and Tera templates).
+# Copied as-is, without placeholder substitution: these files use `{{ }}`
+# for their own syntax.
 exclude = [".github/workflows/**", "justfile", "release-plz.toml"]
-# Documentation for the template itself, not the generated project.
+# Template docs; not copied into generated projects.
+
 ignore = ["TEMPLATE.md"]
 
 [placeholders.description]

@@ -1,6 +1,6 @@
-# Git hooks: https://lefthook.dev
-# Enable once per clone with `lefthook install` (or `just setup`).
-# Only fast checks run here; clippy and tests run via `just ci` and CI.
+# Git hooks (https://lefthook.dev). Enable with `just setup`.
+# Only fast checks run here; `just ci` runs the rest.
+
 
 pre-commit:
   parallel: true

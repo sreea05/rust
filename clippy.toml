@@ -1,7 +1,7 @@
-# Clippy reads the MSRV from `rust-version` in Cargo.toml, so lints never
-# suggest APIs newer than the crate supports.
+# Clippy reads the MSRV from Cargo.toml and won't suggest newer APIs.
 
-# Tests may unwrap/expect/panic freely.
+# Allow these in tests.
+
 allow-unwrap-in-tests = true
 allow-expect-in-tests = true
 allow-panic-in-tests = true

@@ -1,6 +1,7 @@
-# Development toolchain. Pinned so local runs and CI produce the same
-# lints and formatting; Renovate opens a PR for each new stable release.
-# The crate's minimum supported version is `rust-version` in Cargo.toml.
+# Toolchain for development and CI, pinned so everyone gets the same lints
+# and formatting. Renovate proposes upgrades. The oldest Rust version the
+# crate supports (MSRV) is `rust-version` in Cargo.toml.
+
 [toolchain]
 channel = "1.100.0"
 components = ["rustfmt", "clippy", "llvm-tools"]
