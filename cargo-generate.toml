@@ -3,9 +3,13 @@ cargo_generate_version = ">=0.23.0"
 # Copied as-is, without placeholder substitution: these files use `{{ }}`
 # for their own syntax.
 exclude = [".github-project/workflows/**", "justfile", "release-plz.toml"]
-# Template docs; not copied into generated projects.
+# The template repository's own files. The project's versions are stored
+# as README.project.md, LICENSE.project and .github-project/, and
+# post-generate.rhai moves them into place.
+ignore = ["README.md", "LICENSE", ".github"]
 
-ignore = ["TEMPLATE.md"]
+[hooks]
+post = ["post-generate.rhai"]
 
 [placeholders.description]
 type = "string"
