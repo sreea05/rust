@@ -1,5 +1,6 @@
 [template]
-cargo_generate_version = ">=0.23.0"
+# Oldest version tested with the post-generation script.
+cargo_generate_version = ">=0.26.0"
 # Copied as-is, without placeholder substitution: these files use `{{ }}`
 # for their own syntax.
 exclude = [".github-project/workflows/**", "justfile", "release-plz.toml"]
