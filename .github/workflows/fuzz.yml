@@ -35,7 +35,8 @@ jobs:
       contents: read
       packages: read
     container:
-      image: ${{ needs.image.outputs.image }}
+      # Pinned by digest at runtime (see devcontainer.yml).
+      image: ${{ needs.image.outputs.image }} # zizmor: ignore[unpinned-images]
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
