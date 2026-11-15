@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Installs the pinned toolchains and tools for the devcontainer image.
+# Installs the pinned toolchains and tools into the devcontainer image.
 # Usage: install-tools.sh <dir> <toolchains|tools|msrv|all>
-# <dir> holds tools.toml, rust-toolchain.toml and (for msrv) Cargo.toml.
+# <dir> contains tools.toml, rust-toolchain.toml and (for msrv) Cargo.toml.
 set -euo pipefail
 
 src=${1:?usage: install-tools.sh <dir>}
 tools="$src/tools.toml"
 
-# value <section> <key>: read a string value from tools.toml.
+# value <section> <key>: print a value from tools.toml.
 value() {
     awk -v section="[$1]" -v key="$2" '
         /^\[/ { in_section = ($0 == section); next }
@@ -16,7 +16,7 @@ value() {
         }' "$tools"
 }
 
-# crate_specs: every `name = "version"` in [crates] as `name@version`.
+# crate_specs: print each [crates] entry as `name@version`.
 crate_specs() {
     awk '
         /^\[/ { in_section = ($0 == "[crates]"); next }
@@ -28,13 +28,13 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 install_toolchains() {
-    # Stable from rust-toolchain.toml, made the default outside the repo too.
+    # Stable from rust-toolchain.toml; also the default outside the repo.
     (cd "$src" && rustup toolchain install)
     local stable
     stable=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$src/rust-toolchain.toml")
     rustup default "$stable"
 
-    # Nightly, for docs.rs-style docs and the optional Miri / fuzzing.
+    # Nightly, for docs.rs-style docs, Miri and fuzzing.
     local nightly components
     nightly=$(value rust nightly)
     components=$(value rust nightly-components)
@@ -70,8 +70,9 @@ install_crates() {
     version=$(value bootstrap cargo-binstall)
     curl -fsSL "https://github.com/cargo-bins/cargo-binstall/releases/download/v$version/cargo-binstall-$arch-unknown-linux-musl.tgz" |
         tar -xz -C "$CARGO_HOME/bin"
-    # Falls back to compiling from source if no prebuilt binary is found
-    # (e.g. when GitHub API rate limits are hit without a token).
+    # Compiles from source when no prebuilt binary can be fetched
+    # (e.g. GitHub API rate limit without a token).
+
     # shellcheck disable=SC2046 # one argument per crate is intended
     cargo binstall --no-confirm --locked --disable-telemetry $(crate_specs)
 }
