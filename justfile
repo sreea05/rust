@@ -110,9 +110,12 @@ miri:
     cargo +{{ nightly }} miri test --all-features
 
 # Run each fuzz target for the given number of seconds.
+# `--target` is the compiler's host: cargo-fuzz otherwise defaults to the
+# platform it was built for, which is musl for the prebuilt binary.
 fuzz seconds="60":
+    host=$(rustc -vV | sed -n 's/^host: //p'); \
     for target in $(cargo +{{ nightly }} fuzz list); do \
-        cargo +{{ nightly }} fuzz run "$target" -- -max_total_time={{ seconds }}; \
+        cargo +{{ nightly }} fuzz run --target "$host" "$target" -- -max_total_time={{ seconds }}; \
     done
 
 # Run benchmarks. Extra arguments go to cargo, e.g. `just bench -- --save-baseline main`.
