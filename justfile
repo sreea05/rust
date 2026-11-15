@@ -93,10 +93,13 @@ doc-open:
 deny:
     cargo deny --locked check
 
-# Report breaking public-API changes compared with a git ref.
+# Fail if the public API has breaking changes compared with a git ref.
+# `--release-type minor` is needed because PRs don't bump the version
+# (release-plz does), and an unchanged version makes semver-checks assume a
+# major release where every break is allowed.
 semver baseline="origin/main":
     if git rev-parse --verify --quiet "{{ baseline }}^{commit}" >/dev/null; then \
-        cargo semver-checks --baseline-rev "{{ baseline }}"; \
+        cargo semver-checks --baseline-rev "{{ baseline }}" --release-type minor; \
     else \
         echo "semver: baseline '{{ baseline }}' not found, skipping"; \
     fi
