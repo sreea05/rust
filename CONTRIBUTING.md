@@ -3,77 +3,12 @@
 Everything about how this project is built, checked and released is in
 this file.
 
-1. [New repository checklist](#new-repository-checklist)
-2. [Getting started](#getting-started)
-3. [Commands](#commands)
-4. [What runs automatically](#what-runs-automatically)
-5. [Project rules](#project-rules)
-6. [Tools](#tools)
-7. [Configuration files](#configuration-files)
-
-## New repository checklist
-
-Do these after generating a project from the template.
-
-### Once, before your first crate
-
-- [ ] **Create the release bot** (optional, recommended). GitHub doesn't run
-  CI on pull requests opened by a workflow's built-in token, so release PRs
-  would show no checks. A GitHub App (a bot account you own) avoids that,
-  and one app serves all your repositories:
-  1. GitHub → your profile → *Settings* → *Developer settings* →
-     *GitHub Apps* → *New GitHub App*.
-  2. Name it (e.g. `{{github_owner}}-release-bot`), set any homepage URL,
-     and untick *Webhook → Active*.
-  3. Under *Repository permissions* set **Contents** and **Pull requests**
-     to *Read and write*. Choose *Only on this account*, then *Create*.
-  4. Note the **Client ID** and click *Generate a private key* (downloads a
-     `.pem` file). Keep both; every repository needs them.
-
-### For each new repository
-
-- [ ] **Open the project in the devcontainer** (or run `just setup`). This
-  creates `Cargo.lock` and installs the git hooks.
-- [ ] **Fill in `keywords` and `categories`** in `Cargo.toml` so the crate
-  can be found on crates.io (up to 5 of each; categories must come from
-  <https://crates.io/category_slugs>).
-- [ ] **Create the GitHub repository** `{{github_owner}}/{{project-name}}`
-  (empty, no README or license), then commit everything, **including
-  `Cargo.lock`**, and push to `main`. CI fails without `Cargo.lock`.
-- [ ] **Make the devcontainer package public** (public repositories only).
-  The first CI run creates it: repository → *Packages* → *devcontainer* →
-  *Package settings* → *Change visibility*. This lets PRs from forks use it.
-- [ ] **Enable private vulnerability reporting:** repository → *Settings* →
-  *Advanced Security* (*Code security* on some accounts) → *Private
-  vulnerability reporting* → *Enable*.
-  `SECURITY.md` points reporters there.
-- [ ] **Install Renovate** for the repository: <https://github.com/apps/renovate>
-  → *Configure* → add the repository.
-- [ ] **Connect the release bot:** install your GitHub App on the repository
-  (app settings → *Install App*), then in the repository → *Settings* →
-  *Secrets and variables* → *Actions* add:
-  - the **variable** `RELEASE_APP_CLIENT_ID` with the Client ID;
-  - the **secret** `RELEASE_APP_PRIVATE_KEY` with the whole `.pem` file.
-- [ ] **Protect `main`:** repository → *Settings* → *Rules* → new branch
-  ruleset requiring pull requests and the status checks `lint`, `test`,
-  `msrv`, `hack`, `doc`, `deny`, `coverage`{% if uses_unsafe %}, `miri`{% endif %}{% if fuzzing %}, `fuzz`{% endif %}.
-  Don't require `semver` (see [Commit messages](#commit-messages)).
-{%- if codecov %}
-- [ ] **Connect Codecov:** sign in at <https://codecov.io> with GitHub, add
-  the repository, and save its upload token as the repository secret
-  `CODECOV_TOKEN`. Until then the upload step is skipped.
-{%- endif %}
-
-### Before the first release
-
-- [ ] **Publish the first version by hand.** crates.io only allows
-  token-free publishing for crates that already exist:
-  `cargo login` (token from <https://crates.io/settings/tokens>), then
-  `cargo publish`.
-- [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
-  *Trusted Publishing* → *Add*: owner `{{github_owner}}`, repository
-  `{{project-name}}`, workflow `release-plz.yml`, environment empty.
-  From then on, releases happen by merging release PRs (see [Releases](#releases)).
+1. [Getting started](#getting-started)
+2. [Commands](#commands)
+3. [What runs automatically](#what-runs-automatically)
+4. [Project rules](#project-rules)
+5. [Tools](#tools)
+6. [Configuration files](#configuration-files)
 
 ## Getting started
 
