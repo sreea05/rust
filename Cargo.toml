@@ -27,6 +27,35 @@ include = [
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
+[lints.rust]
+{% if uses_unsafe -%}
+# Unsafe is allowed only where a module opts in with `#[allow(unsafe_code)]`,
+# so every unsafe region is explicit and easy to find in review.
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+{% else -%}
+unsafe_code = "forbid"
+{% endif -%}
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+unused_qualifications = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(docsrs)"] }
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
+{% if uses_unsafe -%}
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+missing_safety_doc = "deny"
+{% endif -%}
+
 [dependencies]
 
 [dev-dependencies]
