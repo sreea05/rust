@@ -20,6 +20,7 @@ jobs:
   release:
     name: Release unpublished version
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       pull-requests: read
@@ -54,6 +55,7 @@ jobs:
   release-pr:
     name: Open or update release PR
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       pull-requests: write
