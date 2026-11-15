@@ -1,0 +1,61 @@
+# Weekly early-warning run: catches breakage that appears without any
+# commit to this repository (new toolchains, new dependency releases,
+# new security advisories, base image updates).
+name: Scheduled
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  NEXTEST_PROFILE: ci
+
+jobs:
+  # Rebuilds the devcontainer image from scratch, refreshing base packages
+  # and proving the Dockerfile still builds.
+  image:
+    name: Devcontainer image
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/devcontainer.yml
+    with:
+      rebuild: true
+
+  check:
+    name: ${{ matrix.name }}
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: beta toolchain
+            command: just test-toolchain beta
+          - name: nightly toolchain
+            command: just test-toolchain nightly
+          - name: latest dependencies
+            command: just test-latest
+          - name: dependency audit
+            command: just deny
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run ${{ matrix.command }}
+        env:
+          COMMAND: ${{ matrix.command }}
+        run: $COMMAND
