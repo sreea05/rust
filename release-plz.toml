@@ -1,0 +1,12 @@
+# release-plz: https://release-plz.dev/docs/config
+
+[workspace]
+# Update CHANGELOG.md from Conventional Commit messages.
+changelog_update = true
+# Create a GitHub release (and tag) for every published version.
+git_release_enable = true
+# Use cargo-semver-checks to detect API breaks when choosing the next version.
+semver_check = true
+# Publish only when a release PR is merged, never on ordinary pushes.
+release_always = false
+pr_labels = ["release"]
