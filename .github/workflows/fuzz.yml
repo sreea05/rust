@@ -1,0 +1,59 @@
+# Short fuzzing run on every push and PR, so new crashes surface early.
+# Longer campaigns are better run locally: `just fuzz 3600`.
+# Only present when the crate was generated with fuzzing enabled.
+name: Fuzz
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: Seconds to run each fuzz target
+        default: "60"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  image:
+    name: Devcontainer image
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/devcontainer.yml
+
+  fuzz:
+    name: fuzz
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run just fuzz
+        env:
+          SECONDS_PER_TARGET: ${{ inputs.seconds || '60' }}
+        run: just fuzz "$SECONDS_PER_TARGET"
+
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzz-artifacts
+          path: fuzz/artifacts
+          if-no-files-found: ignore
