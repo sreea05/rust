@@ -1,6 +1,6 @@
 [package]
 name = "{{project-name}}"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2024"
 # MSRV policy: support roughly the last six months of stable releases
 # (about stable minus 4). Bumping it is a minor-version change.
