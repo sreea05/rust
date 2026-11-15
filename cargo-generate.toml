@@ -2,7 +2,7 @@
 cargo_generate_version = ">=0.23.0"
 # Copied as-is, without placeholder substitution: these files use `{{ }}`
 # for their own syntax.
-exclude = [".github/workflows/**", "justfile", "release-plz.toml"]
+exclude = [".github-project/workflows/**", "justfile", "release-plz.toml"]
 # Template docs; not copied into generated projects.
 
 ignore = ["TEMPLATE.md"]
@@ -38,10 +38,10 @@ prompt = "Upload coverage to Codecov?"
 default = false
 
 [conditional.'!uses_unsafe']
-ignore = [".github/workflows/miri.yml"]
+ignore = [".github-project/workflows/miri.yml"]
 
 [conditional.'!fuzzing']
-ignore = ["fuzz", ".github/workflows/fuzz.yml"]
+ignore = ["fuzz", ".github-project/workflows/fuzz.yml"]
 
 [conditional.'!benchmarks']
 ignore = ["benches"]
