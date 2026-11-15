@@ -1,5 +1,5 @@
-# Runs the test suite under Miri to catch undefined behaviour in unsafe
-# code. Only present when the crate was generated with unsafe enabled.
+# Runs the tests under Miri to catch undefined behaviour in unsafe code.
+
 name: Miri
 
 on:

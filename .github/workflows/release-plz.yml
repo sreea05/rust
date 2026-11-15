@@ -1,13 +1,13 @@
 # Releases with release-plz (https://release-plz.dev):
-#  - release-pr: on every push to main, opens or updates a "chore: release"
-#    PR that bumps the version and updates CHANGELOG.md.
-#  - release: when that PR is merged, tags the commit, creates a GitHub
-#    release and publishes to crates.io via trusted publishing (no token).
+#  - release-pr: each push to main opens or updates a release PR that bumps
+#    the version and updates CHANGELOG.md.
+#  - release: merging that PR tags it, creates a GitHub release and
+#    publishes to crates.io (trusted publishing, no stored token).
 #
-# Optional release bot: PRs opened with the default GITHUB_TOKEN don't
-# trigger CI. Set the RELEASE_APP_CLIENT_ID variable and the
-# RELEASE_APP_PRIVATE_KEY secret (see README) to open them as a GitHub App
-# instead, so CI runs on release PRs. Without them, GITHUB_TOKEN is used.
+# GitHub doesn't run CI on PRs opened with the default token. To fix that,
+# set the RELEASE_APP_CLIENT_ID variable and RELEASE_APP_PRIVATE_KEY secret
+# (see CONTRIBUTING.md) and the PR is opened by your release bot instead.
+
 name: Release
 
 on:

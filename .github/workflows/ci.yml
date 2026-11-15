@@ -1,6 +1,5 @@
-# Main CI. Every job runs inside the devcontainer image and calls one
-# `just` recipe, so a failing job can be reproduced locally with the same
-# command in the same container.
+# Main CI. Each job runs one `just` recipe inside the devcontainer image,
+# so any failure can be reproduced locally with the same command.
 name: CI
 
 on:
@@ -80,7 +79,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
-      # Optional: set the CODECOV_TOKEN repository secret to upload reports.
+      # Upload to Codecov only if the CODECOV_TOKEN secret is set.
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Check out repository
@@ -114,10 +113,10 @@ jobs:
           token: ${{ env.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
-  # Fails when the PR breaks the public API compared with the base branch.
-  # Not meant as a required check: a failure means the change needs a
-  # breaking-change commit (`feat!:` / `fix!:`) so release-plz bumps the
-  # version accordingly.
+  # Fails when the PR breaks the public API. Don't make it a required check:
+  # a failure means the commit should be marked breaking (`feat!:`), so
+  # release-plz bumps the version correctly.
+
   semver:
     name: semver
     if: github.event_name == 'pull_request'
