@@ -1,12 +1,18 @@
 # Rust library template
 
-A [cargo-generate](https://cargo-generate.github.io/cargo-generate/) template
-for Rust library crates, with tooling, CI and releases set up from the start.
+A template for starting a new Rust library crate with everything around the
+code already set up: formatting, linting, tests, coverage, dependency
+auditing, CI, automated dependency updates and releases to crates.io.
 
-- **This README:** creating a new crate and setting up its repository.
-- **[CONTRIBUTING.md](CONTRIBUTING.md):** how a generated project works:
-  commands, CI, releases, rules and tools. Every generated project gets a
-  copy with its own names filled in; the copy here shows the raw template.
+You generate a new project from it with
+[cargo-generate](https://cargo-generate.github.io/cargo-generate/), answer a
+few questions, and get a crate that passes all its checks from the first
+commit.
+
+The core idea: **one devcontainer image and one set of commands, used
+everywhere.** Every tool is pinned inside a container image. You develop in
+that image and CI runs in that same image. Every check is a `just` command,
+so whatever passes on your machine passes in CI.
 
 ## What you get
 
@@ -24,12 +30,22 @@ for Rust library crates, with tooling, CI and releases set up from the start.
   merging a release PR.
 - **Optional extras:** Miri for `unsafe` code, fuzzing, benchmarks, Codecov.
 
-Details: [CONTRIBUTING.md](CONTRIBUTING.md).
+## Getting started
 
-## Create a new crate
+### Prerequisites
+
+| You need | For |
+|---|---|
+| [Rust](https://rustup.rs) | Running cargo-generate on your machine |
+| [cargo-generate](https://cargo-generate.github.io/cargo-generate/) 0.26+ | Creating projects: `cargo install cargo-generate` |
+| [Docker](https://docs.docker.com/get-docker/) | Running the devcontainer |
+| [VS Code](https://code.visualstudio.com) with the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension | Working inside the devcontainer |
+| A GitHub account | Hosting the repository and running CI |
+| A [crates.io](https://crates.io) account (sign in with GitHub) | Publishing the crate |
+
+### 1. Generate the project
 
 ```sh
-cargo install cargo-generate
 cargo generate --git https://github.com/sreea05/rust
 ```
 
@@ -47,7 +63,73 @@ You'll be asked for:
 
 Skip the prompts by passing answers, e.g. `-d uses_unsafe=true -d fuzzing=false`.
 
-Then work through the checklist below.
+### 2. Open it in the devcontainer
+
+Open the new folder in VS Code and choose **Reopen in Container**. The first
+build downloads and installs every toolchain and tool, which takes several
+minutes; later starts are instant. When it finishes, `just setup` has
+already run: `Cargo.lock` exists and the git hooks are installed.
+
+In the container's terminal, confirm everything passes:
+
+```sh
+just ci
+```
+
+Run `just` on its own to see every available command.
+
+### 3. Replace the example code
+
+The project ships with a small example function, `checked_add`, so every
+tool has something to work on. Replace it with your own code in:
+
+- `src/lib.rs`: the library and its unit tests
+- `tests/api.rs`: integration tests
+- `examples/basic.rs`: a runnable example
+- `README.md`: the usage example (it's tested, so it must compile)
+- `benches/checked_add.rs` and `fuzz/fuzz_targets/checked_add.rs`, if you
+  enabled them (rename them, and update their names in `Cargo.toml` and
+  `fuzz/Cargo.toml`)
+
+Run `just ci` again when you're done.
+
+### 4. Put it on GitHub
+
+Work through the [new repository checklist](#new-repository-checklist):
+create the repository, push, and connect the services. The first CI run
+builds the devcontainer image on GitHub (several minutes, once); later runs
+reuse it.
+
+### 5. Release
+
+When you're ready for a first release, follow
+[Before the first release](#before-the-first-release). After that,
+releasing is just merging a PR (see below).
+
+## Day-to-day workflow
+
+```mermaid
+flowchart LR
+    A[Change code] --> B[just ci]
+    B --> C[Commit<br/>feat: / fix: ...]
+    C --> D[Pull request<br/>CI runs]
+    D --> E[Merge to main]
+    E --> F[release-plz updates<br/>the release PR]
+    F --> G[Merge release PR]
+    G --> H[Published to<br/>crates.io]
+```
+
+1. **Change the code** and run `just ci`. The git hook checks formatting and
+   spelling on every commit.
+2. **Write commit messages** as [Conventional Commits](https://www.conventionalcommits.org/)
+   (`feat: ...`, `fix: ...`). They decide the next version number and
+   become the changelog.
+3. **Open a pull request.** CI runs every check in the devcontainer image.
+4. **Merge.** release-plz keeps a release PR open with the next version
+   and changelog. Merge it whenever you want to release; it publishes to
+   crates.io and creates a GitHub release.
+5. **Dependency updates** arrive as Renovate PRs on Monday mornings. Review
+   and merge them like any other PR.
 
 ## New repository checklist
 
@@ -113,7 +195,16 @@ Then work through the checklist below.
 - [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
   *Trusted Publishing* → *Add*: your GitHub owner and repository name,
   workflow `release-plz.yml`, environment empty. From then on, releases
-  happen by merging release PRs ([how](CONTRIBUTING.md#releases)).
+  happen by merging release PRs.
+
+## Where to find what
+
+| To find out | Look at |
+|---|---|
+| What the template gives you and how to start | This README |
+| How a generated project works: every command, workflow, rule and tool | `CONTRIBUTING.md` in the project ([template version](CONTRIBUTING.md), with raw placeholders) |
+| The available commands | Run `just` in the project |
+| Tool versions | `.devcontainer/tools.toml` and `rust-toolchain.toml` |
 
 ## Working on the template
 
@@ -135,9 +226,10 @@ templated `Cargo.toml`, so dependencies there are updated in each project
 instead.
 
 The **Template** workflow (`.github/workflows/template.yml`) tests every
-change: it generates a minimal and a full project and runs all their checks
-in their devcontainer. To do the same locally (`--path .` copies your
-working copy as it is, including uncommitted and untracked files):
+change: it audits the workflows, generates a minimal and a full project, and
+runs all their checks in their devcontainer. To do the same locally
+(`--path .` copies your working copy as it is, including uncommitted and
+untracked files):
 
 ```sh
 cargo generate --path . --name demo-lib -d description=Demo -d github_owner=you \
