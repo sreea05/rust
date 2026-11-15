@@ -136,7 +136,8 @@ instead.
 
 The **Template** workflow (`.github/workflows/template.yml`) tests every
 change: it generates a minimal and a full project and runs all their checks
-in their devcontainer. To do the same locally:
+in their devcontainer. To do the same locally (`--path .` copies your
+working copy as it is, including uncommitted and untracked files):
 
 ```sh
 cargo generate --path . --name demo-lib -d description=Demo -d github_owner=you \
