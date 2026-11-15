@@ -1,0 +1,148 @@
+# Main CI. Every job runs inside the devcontainer image and calls one
+# `just` recipe, so a failing job can be reproduced locally with the same
+# command in the same container.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NEXTEST_PROFILE: ci
+
+jobs:
+  image:
+    name: Devcontainer image
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/devcontainer.yml
+
+  check:
+    name: ${{ matrix.recipe }}
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # lint: rustfmt, clippy, taplo, typos, zizmor
+        # test: nextest + doctests   msrv: build on rust-version
+        # hack: feature combinations  doc: docs.rs-style docs
+        # deny: licenses, advisories, bans, sources
+        recipe: [lint, test, msrv, hack, doc, deny]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Cache build output
+        if: matrix.recipe != 'deny'
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ${{ matrix.recipe }}
+          cache-bin: "false"
+
+      - name: Run just ${{ matrix.recipe }}
+        env:
+          RECIPE: ${{ matrix.recipe }}
+        run: just "$RECIPE"
+
+  coverage:
+    name: coverage
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      # Optional: set the CODECOV_TOKEN repository secret to upload reports.
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Cache build output
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: coverage
+          cache-bin: "false"
+
+      - name: Run just cov
+        run: just cov
+
+      - name: Add coverage summary to the job summary
+        run: |
+          {
+            echo '### Coverage'
+            echo '```'
+            cat target/coverage-summary.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload to Codecov
+        if: env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: target/lcov.info
+          token: ${{ env.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  # Fails when the PR breaks the public API compared with the base branch.
+  # Not meant as a required check: a failure means the change needs a
+  # breaking-change commit (`feat!:` / `fix!:`) so release-plz bumps the
+  # version accordingly.
+  semver:
+    name: semver
+    if: github.event_name == 'pull_request'
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Cache build output
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: semver
+          cache-bin: "false"
+
+      - name: Run just semver
+        env:
+          BASELINE: origin/${{ github.base_ref }}
+        run: just semver "$BASELINE"
