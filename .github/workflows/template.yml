@@ -1,5 +1,6 @@
-# Tests the template: generates a minimal and a full project, builds each
-# one's devcontainer image, and runs all its checks inside it.
+# Tests the template: audits all workflows, then generates a minimal and a
+# full project, builds each one's devcontainer image, and runs all its
+# checks inside it.
 name: Template
 
 on:
@@ -15,6 +16,26 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  audit:
+    name: workflow audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install zizmor
+        uses: taiki-e/install-action@68a389c788b2cd04016ce8c80ee23b80d2ab3d68 # v2.88.1
+        with:
+          tool: zizmor@1.31.1
+
+      - name: Audit this repository's and the project's workflows
+        run: zizmor --offline .github/workflows .github-project/workflows
+
   generate:
     name: ${{ matrix.variant }}
     runs-on: ubuntu-latest
