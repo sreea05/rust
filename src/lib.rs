@@ -22,6 +22,11 @@ pub const fn checked_add(left: u64, right: u64) -> Option<u64> {
     left.checked_add(right)
 }
 
+// Runs the README's code examples as doctests, so they can't go stale.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;
+
 #[cfg(test)]
 mod tests {
     use super::*;
