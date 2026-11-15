@@ -74,7 +74,7 @@ failure can be reproduced locally with the same command.
 | Fuzz | Every push to `main` and every PR | Each fuzz target for 60 s; crash inputs are uploaded as an artifact |
 {%- endif %}
 | Scheduled | Mondays | Rebuilds the image from scratch, tests on beta and nightly and with the newest dependencies, re-checks advisories |
-| Release | Every push to `main` | See [Releases](#releases) |
+| Release | A `release/*` branch is created, and its PR is merged | See [Releases](#releases) |
 
 The devcontainer image is built once and stored in the repository's GitHub
 packages, tagged with a hash of the files it's built from; it's only rebuilt
@@ -84,15 +84,33 @@ and is uploaded to Codecov{% endif %}.
 GitHub pauses scheduled workflows after 60 days without activity in the
 repository; re-enable them from the *Actions* tab.
 
+### Changes to `main`
+
+`main` is protected (`.github/rulesets/main.json`): every change goes
+through a pull request with passing CI and is merged by squash or rebase,
+so history stays linear. No one can push to it directly.
+
 ### Releases
 
-[release-plz](https://release-plz.dev) handles releases:
+[release-plz](https://release-plz.dev) handles releases, but only when you
+start one:
 
-1. Every push to `main` opens or updates a **release PR** that bumps the
-   version (based on the [commit messages](#commit-messages) and an API
-   check) and updates `CHANGELOG.md`.
-2. Merging it tags the commit, creates a GitHub release, and publishes to
-   crates.io using trusted publishing, so no crates.io token is stored.
+1. **Create a branch** named `release/<anything>` from `main` and push it:
+
+   ```sh
+   git switch main && git pull
+   git switch -c release/next && git push -u origin release/next
+   ```
+
+2. **release-plz prepares it:** it bumps the version (based on the
+   [commit messages](#commit-messages) and an API check), updates
+   `CHANGELOG.md`, commits to your branch, and opens a pull request into
+   `main`. If nothing changed since the last release, it stops there.
+3. **Merge the pull request** once CI passes. release-plz tags the commit,
+   creates a GitHub release, and publishes to crates.io using trusted
+   publishing, so no crates.io token is stored.
+
+Ordinary merges to `main` never trigger a release.
 
 ### Dependency updates
 
@@ -113,7 +131,7 @@ them into the version bump and changelog:
 - `feat:` new functionality → minor version bump
 - `fix:` bug fix → patch version bump
 - `feat!:` / `fix!:` or a `BREAKING CHANGE:` footer → breaking release
-- `docs:`, `test:`, `refactor:`, `perf:`, `ci:`, `build:`, `chore:` → no release on their own
+- `docs:`, `test:`, `refactor:`, `perf:`, `ci:`, `build:`, `chore:` → no version bump on their own
 
 Keep each commit to one logical change. When the `semver` check fails, the PR
 changes the public API in a breaking way: mark the commit as breaking
@@ -187,6 +205,7 @@ Everything below is preinstalled in the devcontainer. Versions are pinned in
 | `justfile` | All commands |
 | `.devcontainer/` | Dev and CI image: `Dockerfile`, tool versions (`tools.toml`), install script |
 | `.github/workflows/` | CI, release and scheduled workflows |
+| `.github/rulesets/main.json` | Protection rules for `main` (imported into GitHub's settings) |
 | `.github/` (other files) | Issue and PR templates, `CODEOWNERS` |
 | `rustfmt.toml`, `taplo.toml`, `.editorconfig` | Formatting |
 | `clippy.toml` | Clippy settings (lint levels are in `Cargo.toml`) |
