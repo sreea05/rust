@@ -4,12 +4,8 @@
 slow-timeout = { period = "30s", terminate-after = 4 }
 
 # CI profile (CI sets NEXTEST_PROFILE=ci): run all tests even after a
-# failure, show output only for failures, and write a JUnit report.
-
+# failure and show output only for failures.
 [profile.ci]
 fail-fast = false
 failure-output = "immediate-final"
 success-output = "never"
-
-[profile.ci.junit]
-path = "junit.xml"
