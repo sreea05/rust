@@ -8,6 +8,24 @@ for Rust library crates, with tooling, CI and releases set up from the start.
   commands, CI, releases, rules and tools. Every generated project gets a
   copy with its own names filled in; the copy here shows the raw template.
 
+## What you get
+
+- **Crate setup:** edition 2024, a minimum supported Rust version of about
+  six months back, strict lints, docs built the way docs.rs builds them.
+- **Checks:** formatting, lints, spelling, tests, coverage, oldest supported
+  Rust version, feature combinations, dependency licenses and advisories,
+  breaking-API detection, workflow security.
+- **One command per check:** `just lint`, `just test` and so on; `just ci`
+  runs them all, exactly as CI does.
+- **Devcontainer:** every toolchain and tool at pinned versions, used both
+  locally and by CI.
+- **Automation:** CI on every push and PR, a weekly run against new Rust and
+  dependency releases, Renovate update PRs, and releases to crates.io by
+  merging a release PR.
+- **Optional extras:** Miri for `unsafe` code, fuzzing, benchmarks, Codecov.
+
+Details: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Create a new crate
 
 ```sh
