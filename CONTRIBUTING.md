@@ -16,8 +16,8 @@ and tools as CI.
 `Cargo.lock` if it's missing and installs the git hooks.
 
 Without the container: install Rust with [rustup](https://rustup.rs) (it
-picks up `rust-toolchain.toml` automatically), install the tools listed in
-`.devcontainer/tools.toml`, then run `just setup`.
+picks up `rust-toolchain.toml` automatically), install the [tools](#tools)
+at the versions in `.devcontainer/tools.toml`, then run `just setup`.
 
 ## Everyday commands
 
@@ -28,7 +28,7 @@ recipes, so passing locally means passing in CI. Run `just` to list them all.
 |---|---|
 | `just ci` | Everything CI runs on a pull request |
 | `just fmt` | Format Rust and TOML files |
-| `just lint` | rustfmt check, clippy, taplo, typos, workflow audit |
+| `just lint` | Formatting, lints, spelling and workflow security checks |
 | `just test` | Unit, integration and doc tests |
 | `just msrv` | Build on the minimum supported Rust version |
 | `just hack` | Check every feature-flag combination |
@@ -42,6 +42,36 @@ recipes, so passing locally means passing in CI. Run `just` to list them all.
 
 The pre-commit hook only runs fast checks (formatting and spelling); run
 `just ci` before opening a pull request.
+
+## Tools
+
+Everything below is preinstalled in the devcontainer. Versions are pinned in
+`.devcontainer/tools.toml` and `rust-toolchain.toml`.
+
+| Tool | Purpose | Used by |
+|---|---|---|
+| [just](https://just.systems) | Runs the project's commands | every command |
+| rustfmt | Formats Rust code | `just fmt`, `just lint` |
+| clippy | Rust linter | `just lint` |
+| [taplo](https://taplo.tamasfe.dev) | Formats TOML files | `just fmt`, `just lint` |
+| [typos](https://github.com/crate-ci/typos) | Spell-checker for code and docs | `just lint`, pre-commit |
+| [zizmor](https://docs.zizmor.sh) | Security audit of the GitHub Actions workflows | `just lint` |
+| [cargo-nextest](https://nexte.st) | Faster test runner with clearer output | `just test`, `just cov` |
+| [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) | Measures test coverage | `just cov` |
+| [cargo-hack](https://github.com/taiki-e/cargo-hack) | Checks every feature-flag combination | `just hack` |
+| [cargo-deny](https://embarkstudios.github.io/cargo-deny/) | Checks dependency licenses, security advisories and sources | `just deny` |
+| [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks) | Detects breaking public-API changes | `just semver`, releases |
+| [lefthook](https://lefthook.dev) | Runs fast checks as a git pre-commit hook | `just setup` |
+| [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) | Installs the tools above as prebuilt binaries | devcontainer build |
+| MSRV toolchain | Builds with the oldest supported Rust version | `just msrv` |
+| Nightly toolchain | Builds docs the way docs.rs does{% if uses_unsafe %}; runs Miri{% endif %}{% if fuzzing %}; runs fuzzing{% endif %} | `just doc`{% if uses_unsafe %}, `just miri`{% endif %}{% if fuzzing %}, `just fuzz`{% endif %} |
+{%- if uses_unsafe %}
+| [Miri](https://github.com/rust-lang/miri) | Detects undefined behaviour in unsafe code | `just miri` |
+{%- endif %}
+{%- if fuzzing %}
+| [cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html) | Runs the fuzz targets with libFuzzer | `just fuzz` |
+{%- endif %}
+
 
 ## Commit messages and pull requests
 
