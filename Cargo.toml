@@ -13,6 +13,7 @@ keywords = []
 categories = []
 include = [
   "/src/**",
+  "/benches/**",
   "/examples/**",
   "/tests/**",
   "/Cargo.toml",
