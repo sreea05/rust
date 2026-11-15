@@ -9,6 +9,9 @@
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
   "minimumReleaseAge": "14 days",
+  "github-actions": {
+    "managerFilePatterns": ["/(^|/)\\.github-project/workflows/[^/]+\\.ya?ml$/"]
+  },
   "packageRules": [
     {
       "description": "One PR for all GitHub Actions updates",

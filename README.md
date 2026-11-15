@@ -123,6 +123,12 @@ repository:
 | `LICENSE.project` | `LICENSE` |
 | `.github-project/` | `.github/` |
 
+Install [Renovate](https://github.com/apps/renovate) on this repository too,
+so the pinned versions here (actions, tools, base image, toolchain) stay
+current and new projects start up to date. Renovate can't parse the
+templated `Cargo.toml`, so dependencies there are updated in each project
+instead.
+
 The **Template** workflow (`.github/workflows/template.yml`) tests every
 change: it generates a minimal and a full project and runs all their checks
 in their devcontainer. To do the same locally:
