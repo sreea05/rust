@@ -1,4 +1,4 @@
-# Every check CI runs is a recipe here; CI calls these same recipes.
+# Every check is a recipe here, and CI runs these same recipes.
 # Run `just` to list them.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
@@ -10,12 +10,12 @@ msrv := `sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml`
 default:
     @just --list --unsorted
 
-# One-time setup after cloning: create Cargo.lock if missing, install git hooks.
+# One-time setup: create Cargo.lock if missing and install git hooks.
 setup:
     cargo fetch
     lefthook install
 
-# Run everything CI runs on a pull request.
+# Run every check CI runs on a pull request.
 ci: lint test msrv hack doc deny cov semver
 
 # --- Formatting and linting -------------------------------------------------
@@ -32,7 +32,7 @@ lint: fmt-check clippy toml-check typos zizmor
 fmt-check:
     cargo fmt --all --check
 
-# Clippy on all targets and features; warnings are errors.
+# Run clippy on all targets and features; warnings are errors.
 clippy:
     cargo clippy --locked --all-targets --all-features -- -D warnings
 
@@ -50,12 +50,12 @@ zizmor:
 
 # --- Tests ------------------------------------------------------------------
 
-# Unit, integration and doc tests. Set NEXTEST_PROFILE=ci for CI output.
+# Run unit, integration and doc tests.
 test:
     cargo nextest run --locked --all-features --no-tests=warn
     cargo test --locked --all-features --doc
 
-# Check that the library builds on the minimum supported Rust version.
+# Check the library builds on the minimum supported Rust version.
 msrv:
     rustup toolchain install {{ msrv }} --profile minimal --no-self-update
     cargo +{{ msrv }} check --locked --all-features --lib
@@ -64,7 +64,7 @@ msrv:
 hack:
     cargo hack check --locked --feature-powerset --all-targets
 
-# Test with coverage; writes target/lcov.info and prints a summary.
+# Measure test coverage; writes target/lcov.info and prints a summary.
 cov:
     cargo llvm-cov nextest --locked --all-features --no-tests=warn --lcov --output-path target/lcov.info
     cargo llvm-cov report --summary-only | tee target/coverage-summary.txt
@@ -81,7 +81,7 @@ test-toolchain toolchain:
 
 # --- Docs, dependencies, API ------------------------------------------------
 
-# Build docs exactly as docs.rs does (nightly, --cfg docsrs); warnings are errors.
+# Build docs the way docs.rs does; warnings are errors.
 doc:
     RUSTDOCFLAGS="--cfg docsrs -D warnings" cargo +{{ nightly }} doc --locked --no-deps --all-features
 
@@ -93,10 +93,9 @@ doc-open:
 deny:
     cargo deny --locked check
 
-# Fail if the public API has breaking changes compared with a git ref.
-# `--release-type minor` is needed because PRs don't bump the version
-# (release-plz does), and an unchanged version makes semver-checks assume a
-# major release where every break is allowed.
+# Fail if the public API breaks compared with a git ref.
+# PRs don't bump the version, so semver-checks would assume a major release
+# and allow any break; `--release-type minor` makes it flag them.
 semver baseline="origin/main":
     if git rev-parse --verify --quiet "{{ baseline }}^{commit}" >/dev/null; then \
         cargo semver-checks --baseline-rev "{{ baseline }}" --release-type minor; \
@@ -106,7 +105,7 @@ semver baseline="origin/main":
 
 # --- Optional extras --------------------------------------------------------
 
-# Run the test suite under Miri to detect undefined behaviour.
+# Run the tests under Miri to detect undefined behaviour.
 miri:
     cargo +{{ nightly }} miri test --all-features
 
@@ -116,6 +115,7 @@ fuzz seconds="60":
         cargo +{{ nightly }} fuzz run "$target" -- -max_total_time={{ seconds }}; \
     done
 
-# Run benchmarks; extra arguments go to criterion, e.g. `just bench -- --save-baseline main`.
+# Run benchmarks. Extra arguments go to cargo, e.g. `just bench -- --save-baseline main`.
+
 bench *args:
     cargo bench --locked --all-features {{ args }}
