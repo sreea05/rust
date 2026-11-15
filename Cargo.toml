@@ -1,0 +1,32 @@
+[package]
+name = "{{project-name}}"
+version = "0.0.0"
+edition = "2024"
+# MSRV policy: support roughly the last six months of stable releases
+# (about stable minus 4). Bumping it is a minor-version change.
+rust-version = "1.96"
+description = "{{description}}"
+authors = ["{{authors}}"]
+license = "MIT"
+repository = "https://github.com/{{github_owner}}/{{project-name}}"
+documentation = "https://docs.rs/{{project-name}}"
+readme = "README.md"
+keywords = []
+categories = []
+include = [
+  "/src/**",
+  "/examples/**",
+  "/tests/**",
+  "/Cargo.toml",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/LICENSE",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+
+[dev-dependencies]
