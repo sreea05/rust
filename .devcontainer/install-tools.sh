@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Installs the pinned toolchains and tools for the devcontainer image.
-# Usage: install-tools.sh <dir containing tools.toml, rust-toolchain.toml, Cargo.toml>
+# Usage: install-tools.sh <dir> <toolchains|tools|msrv|all>
+# <dir> holds tools.toml, rust-toolchain.toml and (for msrv) Cargo.toml.
 set -euo pipefail
 
 src=${1:?usage: install-tools.sh <dir>}
@@ -33,17 +34,17 @@ install_toolchains() {
     stable=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$src/rust-toolchain.toml")
     rustup default "$stable"
 
-    # MSRV from Cargo.toml.
-    local msrv
-    msrv=$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' "$src/Cargo.toml")
-    rustup toolchain install "$msrv" --profile minimal
-
     # Nightly, for docs.rs-style docs and the optional Miri / fuzzing.
     local nightly components
     nightly=$(value rust nightly)
     components=$(value rust nightly-components)
-    # shellcheck disable=SC2086 # word splitting is intended
-    rustup toolchain install "$nightly" --profile minimal --component $components
+    rustup toolchain install "$nightly" --profile minimal --component "${components// /,}"
+}
+
+install_msrv() {
+    local msrv
+    msrv=$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' "$src/Cargo.toml")
+    rustup toolchain install "$msrv" --profile minimal
 }
 
 install_lefthook() {
@@ -69,6 +70,8 @@ install_crates() {
     version=$(value bootstrap cargo-binstall)
     curl -fsSL "https://github.com/cargo-bins/cargo-binstall/releases/download/v$version/cargo-binstall-$arch-unknown-linux-musl.tgz" |
         tar -xz -C "$CARGO_HOME/bin"
+    # Falls back to compiling from source if no prebuilt binary is found
+    # (e.g. when GitHub API rate limits are hit without a token).
     # shellcheck disable=SC2046 # one argument per crate is intended
     cargo binstall --no-confirm --locked --disable-telemetry $(crate_specs)
 }
@@ -76,6 +79,7 @@ install_crates() {
 case "${2:-all}" in
     toolchains) install_toolchains ;;
     tools) install_lefthook && install_taplo && install_crates ;;
-    all) install_toolchains && install_lefthook && install_taplo && install_crates ;;
+    msrv) install_msrv ;;
+    all) install_toolchains && install_lefthook && install_taplo && install_crates && install_msrv ;;
     *) echo "unknown step: $2" >&2 && exit 1 ;;
 esac

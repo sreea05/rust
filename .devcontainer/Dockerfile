@@ -17,14 +17,18 @@ RUN apt-get update \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --no-modify-path --profile minimal --default-toolchain none
 
-# Tools first: they change rarely, so this layer stays cached.
-# The optional github_token secret avoids GitHub API rate limits in CI.
-COPY .devcontainer/install-tools.sh .devcontainer/tools.toml /tmp/build/
+# Layers are ordered from least to most frequently changing so rebuilds
+# stay cached. 1) stable (rust-toolchain.toml) and nightly (tools.toml).
+COPY .devcontainer/install-tools.sh .devcontainer/tools.toml rust-toolchain.toml /tmp/build/
+RUN /tmp/build/install-tools.sh /tmp/build toolchains
+
+# 2) Tools from tools.toml. The optional github_token build secret avoids
+# GitHub API rate limits; without it binstall may compile from source.
 RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
     /tmp/build/install-tools.sh /tmp/build tools
 
-# Toolchains: stable (rust-toolchain.toml), MSRV (Cargo.toml), nightly (tools.toml).
-COPY rust-toolchain.toml Cargo.toml /tmp/build/
-RUN /tmp/build/install-tools.sh /tmp/build toolchains \
+# 3) MSRV toolchain from Cargo.toml (`just msrv` also installs it on demand).
+COPY Cargo.toml /tmp/build/
+RUN /tmp/build/install-tools.sh /tmp/build msrv \
     && rm -rf /tmp/build \
     && chown -R vscode:vscode "$RUSTUP_HOME" "$CARGO_HOME"
