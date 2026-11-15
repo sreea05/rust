@@ -56,6 +56,14 @@ install_lefthook() {
     install -m 0755 "$tmp/lefthook_${version}_Linux_${arch}" /usr/local/bin/lefthook
 }
 
+install_taplo() {
+    local version
+    version=$(value bootstrap taplo)
+    curl -fsSL "https://github.com/tamasfe/taplo/releases/download/$version/taplo-linux-$arch.gz" |
+        gunzip >"$tmp/taplo"
+    install -m 0755 "$tmp/taplo" /usr/local/bin/taplo
+}
+
 install_crates() {
     local version
     version=$(value bootstrap cargo-binstall)
@@ -67,7 +75,7 @@ install_crates() {
 
 case "${2:-all}" in
     toolchains) install_toolchains ;;
-    tools) install_lefthook && install_crates ;;
-    all) install_toolchains && install_lefthook && install_crates ;;
+    tools) install_lefthook && install_taplo && install_crates ;;
+    all) install_toolchains && install_lefthook && install_taplo && install_crates ;;
     *) echo "unknown step: $2" >&2 && exit 1 ;;
 esac
