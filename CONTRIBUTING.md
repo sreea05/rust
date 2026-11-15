@@ -141,7 +141,10 @@ renamed items but not changed parameter types.
 - **Minimum supported version (MSRV)** is `rust-version` in `Cargo.toml`:
   roughly the last six months of releases (stable minus 4). Raise it in a
   minor release and note it in the changelog.
-- **docs.rs** builds with nightly, which `just doc` mirrors.
+- **Nightly** (for docs{% if uses_unsafe %}, Miri{% endif %}{% if fuzzing %}, fuzzing{% endif %}) is a dated build pinned in
+  `.devcontainer/tools.toml`. Renovate can't update it: every few months,
+  set a newer date (from <https://rust-lang.github.io/rustup-components-history/>{% if uses_unsafe %}, picking one where Miri is available{% endif %}).
+  docs.rs builds with nightly too, which `just doc` mirrors.
 
 ## Tools
 
