@@ -101,6 +101,11 @@ Then work through the checklist below.
 
 ### Before the first release
 
+- [ ] **Don't merge the first release PR yet.** release-plz opens one for
+  `0.1.0` after your first push, but publishing from CI only works for
+  crates that already exist on crates.io, so merging it now fails. Do the
+  next two steps first; release-plz refreshes the PR on the next push to
+  `main`.
 - [ ] **Publish the first version by hand.** crates.io only allows
   token-free publishing for crates that already exist:
   `cargo login` (token from <https://crates.io/settings/tokens>), then
