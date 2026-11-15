@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-containers",
+    "rust-lang.rust-analyzer",
+    "tamasfe.even-better-toml",
+    "vadimcn.vscode-lldb",
+    "nefrob.vscode-just-syntax",
+    "tekumara.typos-vscode",
+    "github.vscode-github-actions",
+    "editorconfig.editorconfig"
+  ]
+}
