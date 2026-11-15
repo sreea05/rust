@@ -1,8 +1,11 @@
 # Rust library template
 
 A [cargo-generate](https://cargo-generate.github.io/cargo-generate/) template
-for Rust library crates, with the tooling and CI set up from day one.
-This README is not copied into generated projects.
+for Rust library crates, with tooling, CI and releases set up from the start.
+
+**Everything about the generated project (features, commands, CI, releases,
+and the checklist for a new repository) is in [CONTRIBUTING.md](CONTRIBUTING.md).**
+That file is copied into every generated project. This README is not.
 
 ## Create a new crate
 
@@ -11,46 +14,39 @@ cargo install cargo-generate
 cargo generate --git https://github.com/sreea05/rust
 ```
 
+Then work through the
+[new repository checklist](CONTRIBUTING.md#new-repository-checklist).
+
 You'll be asked for:
 
 | Prompt | Default | Effect |
 |---|---|---|
 | Project name | — | Crate and repository name |
 | Description | `A Rust library` | Cargo.toml, README, crate docs |
-| GitHub owner | `sreea05` | Repository URLs, badges, CODEOWNERS |
-| Uses `unsafe`? | no | No: `forbid(unsafe_code)`. Yes: `deny(unsafe_code)`, required `// SAFETY:` comments, and a Miri workflow |
-| Fuzzing? | no | `fuzz/` crate with a cargo-fuzz target and a CI fuzz workflow |
+| GitHub owner | `sreea05` | Repository URLs, badges, CODEOWNERS, license |
+| Uses `unsafe`? | no | No: unsafe code is forbidden. Yes: allowed per module with `// SAFETY:` comments, checked by Miri |
+| Fuzzing? | no | `fuzz/` with a fuzz target, run in CI |
 | Benchmarks? | yes | `benches/` with a criterion benchmark |
-| Codecov? | no | Codecov badge, `codecov.yml`, and upload steps in the docs |
+| Codecov? | no | Coverage uploads to Codecov, plus a badge |
 
-Answers can be given up front, e.g. `-d uses_unsafe=true -d fuzzing=false`.
+Skip the prompts by passing answers, e.g. `-d uses_unsafe=true -d fuzzing=false`.
 
-Then follow **One-time maintainer setup** in the generated `CONTRIBUTING.md`.
+## Working on the template
 
-## What's included
+Files are copied into generated projects with `{{placeholders}}` filled in,
+so the template itself doesn't build. A few files are stored under other
+names and renamed by `post-generate.rhai`, so they don't affect this
+repository:
 
-- **Crate:** edition 2024, MSRV 1.96 (about stable minus 4), strict lints,
-  docs.rs metadata.
-- **Checks:** formatting, linting, spelling, tests, coverage, MSRV, feature
-  combinations, dependency audit, breaking-API detection, workflow security.
-- **Developer workflow:** a `justfile` command for every check, pre-commit
-  hooks, VS Code settings, and a devcontainer.
-- **CI (Linux):** every job runs in the devcontainer image and calls one
-  `just` command; plus a weekly run on beta, nightly and the newest dependencies.
-- **Dependency updates:** Renovate.
-- **Releases:** release-plz release PRs, changelog from Conventional Commits,
-  crates.io trusted publishing, optional GitHub App release bot.
+| In this repository | In generated projects |
+|---|---|
+| `README.project.md` | `README.md` |
+| `LICENSE.project` | `LICENSE` |
+| `.github-project/` | `.github/` |
 
-Each tool and what it's for is listed under **Tools** in
-[CONTRIBUTING.md](CONTRIBUTING.md#tools).
-
-
-## Working on the template itself
-
-The files at the repository root are the template, so they contain Liquid
-placeholders such as `{{project-name}}` and don't build directly; this
-repository's own CI fails for the same reason. To test a change, generate a
-project from your working copy and run the checks in its devcontainer:
+The **Template** workflow (`.github/workflows/template.yml`) tests every
+change: it generates a minimal and a full project and runs all their checks
+in their devcontainer. To do the same locally:
 
 ```sh
 cargo generate --path . --name demo-lib -d description=Demo -d github_owner=you \

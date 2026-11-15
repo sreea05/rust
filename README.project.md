@@ -34,9 +34,9 @@ The MSRV is set by `rust-version` in [Cargo.toml](Cargo.toml) and checked in CI.
 It supports roughly the last six months of stable Rust releases. Raising it
 is not a breaking change and is noted in the [changelog](CHANGELOG.md).
 
-## Contributing
+## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+How the project is built, tested and released: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
