@@ -1,7 +1,6 @@
 # Git hooks (https://lefthook.dev). Enable with `just setup`.
 # Only fast checks run here; `just ci` runs the rest.
 
-
 pre-commit:
   parallel: true
   jobs:

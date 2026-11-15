@@ -118,7 +118,6 @@ jobs:
   # Fails when the PR breaks the public API. Don't make it a required check:
   # a failure means the commit should be marked breaking (`feat!:`), so
   # release-plz bumps the version correctly.
-
   semver:
     name: semver
     if: github.event_name == 'pull_request'

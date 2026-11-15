@@ -15,7 +15,6 @@ env:
 jobs:
   # Rebuild the image from scratch to pick up base image updates and
   # confirm the Dockerfile still builds.
-
   image:
     name: Devcontainer image
     permissions:

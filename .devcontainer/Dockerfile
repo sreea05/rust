@@ -25,7 +25,6 @@ RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
     /tmp/build/install-tools.sh /tmp/build tools
 
 # 3) MSRV toolchain (`just msrv` also installs it if missing).
-
 COPY Cargo.toml /tmp/build/
 RUN /tmp/build/install-tools.sh /tmp/build msrv \
     && rm -rf /tmp/build \
