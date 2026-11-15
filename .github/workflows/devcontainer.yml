@@ -1,0 +1,79 @@
+# Builds the devcontainer image and publishes it to GHCR, tagged by a hash
+# of everything that goes into it. Other workflows call this first and run
+# their jobs inside the resulting image. If the tag already exists the
+# build is skipped, so most runs only pull the cached image.
+name: Devcontainer image
+
+on:
+  workflow_call:
+    inputs:
+      rebuild:
+        description: Rebuild without cache even if the tag exists (refreshes base packages).
+        type: boolean
+        default: false
+    outputs:
+      image:
+        description: Image reference to use as `container.image`.
+        value: ${{ jobs.image.outputs.image }}
+
+permissions: {}
+
+jobs:
+  image:
+    name: Build devcontainer image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.ref.outputs.image }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compute image reference
+        id: ref
+        env:
+          HASH: ${{ hashFiles('.devcontainer/**', 'rust-toolchain.toml') }}
+          REPO: ${{ github.repository }}
+        run: echo "image=ghcr.io/${REPO,,}/devcontainer:${HASH:0:16}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check whether the image already exists
+        id: exists
+        env:
+          IMAGE: ${{ steps.ref.outputs.image }}
+          REBUILD: ${{ inputs.rebuild }}
+        run: |
+          if [[ "$REBUILD" != "true" ]] && docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Using existing image $IMAGE"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.exists.outputs.exists != 'true'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Pull requests from forks can't push to this repository's registry;
+      # their CI works as long as the devcontainer files are unchanged.
+      - name: Build and push image
+        if: steps.exists.outputs.exists != 'true'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: .devcontainer/Dockerfile
+          push: true
+          tags: ${{ steps.ref.outputs.image }}
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          no-cache: ${{ inputs.rebuild }}
+          secrets: github_token=${{ secrets.GITHUB_TOKEN }}
