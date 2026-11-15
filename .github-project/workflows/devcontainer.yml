@@ -79,7 +79,6 @@ jobs:
           secrets: github_token=${{ secrets.GITHUB_TOKEN }}
 
       # Jobs then run this exact image, even if the tag is later overwritten.
-
       - name: Pin image by digest
         id: pin
         env:

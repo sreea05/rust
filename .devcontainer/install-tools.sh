@@ -83,7 +83,6 @@ install_crates() {
         tar -xz -C "$CARGO_HOME/bin"
     # Compiles from source when no prebuilt binary can be fetched
     # (e.g. GitHub API rate limit without a token).
-
     # shellcheck disable=SC2046 # one argument per crate is intended
     cargo binstall --no-confirm --locked --disable-telemetry $(crate_specs)
 }

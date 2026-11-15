@@ -29,7 +29,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 {% if uses_unsafe -%}
 # Modules that need unsafe opt in with `#[allow(unsafe_code)]`,
 # so unsafe code is always easy to find.
-
 unsafe_code = "deny"
 unsafe_op_in_unsafe_fn = "deny"
 {% else -%}

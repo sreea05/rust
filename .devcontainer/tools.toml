@@ -19,7 +19,6 @@ lefthook = "2.2.2"
 taplo = "0.10.0"
 
 # Installed with cargo-binstall.
-
 [crates]
 # renovate: datasource=crate depName=just
 just = "1.59.0"

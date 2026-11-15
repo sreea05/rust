@@ -7,7 +7,6 @@
 # GitHub doesn't run CI on PRs opened with the default token. To fix that,
 # set the RELEASE_APP_CLIENT_ID variable and RELEASE_APP_PRIVATE_KEY secret
 # (see CONTRIBUTING.md) and the PR is opened by your release bot instead.
-
 name: Release
 
 on:
