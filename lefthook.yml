@@ -1,0 +1,15 @@
+# Git hooks: https://lefthook.dev
+# Enable once per clone with `lefthook install` (or `just setup`).
+# Only fast checks run here; clippy and tests run via `just ci` and CI.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: rustfmt
+      glob: "*.rs"
+      run: just fmt-check
+    - name: taplo
+      glob: "*.toml"
+      run: just toml-check
+    - name: typos
+      run: typos {staged_files}
