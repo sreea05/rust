@@ -310,9 +310,9 @@ can be reproduced locally by running that command in the devcontainer.
 
 | Workflow | Runs when | Jobs |
 |---|---|---|
-| **CI** (`ci.yml`) | Every pull request, every merge to `main`, the merge queue | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on pull requests also `semver` |{% if uses_unsafe %}
-| **Miri** (`miri.yml`) | Every pull request, every merge to `main`, the merge queue | `miri` |{% endif %}{% if fuzzing %}
-| **Fuzz** (`fuzz.yml`) | Every pull request, every merge to `main`, the merge queue; also manually with a chosen duration | `fuzz` |{% endif %}
+| **CI** (`ci.yml`) | Every pull request, every merge to `main` | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on pull requests also `semver` |{% if uses_unsafe %}
+| **Miri** (`miri.yml`) | Every pull request, every merge to `main` | `miri` |{% endif %}{% if fuzzing %}
+| **Fuzz** (`fuzz.yml`) | Every pull request, every merge to `main`; also manually with a chosen duration | `fuzz` |{% endif %}
 | **Scheduled** (`scheduled.yml`) | Mondays at 06:00 UTC, or manually | Image rebuild, beta and nightly tests, newest-dependency tests, dependency audit, image cleanup |
 | **Release** (`release-plz.yml`) | A `release/*` branch is created; its pull request is merged | Prepare release PR; publish release |
 | **Devcontainer image** (`devcontainer.yml`) | Called by the workflows above | Builds or reuses the image |
@@ -368,6 +368,9 @@ calling workflow, and GitHub and zizmor treat it as pinned.
 - **Time limits:** every job has one (30 or 60 minutes), so a hung job
   can't run for hours.
 - **Superseded runs:** pushing to a pull request cancels its previous CI run.
+- **Merge queue:** none is set up, but the pull request workflows also run
+  for a [merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue),
+  so you can enable one in the ruleset without changing them.
 - **Pauses:** GitHub pauses scheduled workflows after 60 days without
   repository activity; re-enable them from the *Actions* tab.
 
