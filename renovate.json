@@ -46,6 +46,14 @@
       "matchStrings": ["channel = \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
       "depNameTemplate": "rust-lang/rust",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "description": "release-plz, installed by the release workflow",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github(-project)?/workflows/release-plz\\.yml$/"],
+      "matchStrings": ["release-plz@(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "release-plz",
+      "datasourceTemplate": "crate"
     }
   ]
 }
