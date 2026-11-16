@@ -721,7 +721,11 @@ serves all your repositories; skip this if you already have one.
 - [ ] **Publish the first version by hand.** Publishing from CI only works
   for crates that already exist on crates.io. From an up-to-date `main`:
   `cargo login` (token from <https://crates.io/settings/tokens>), then
-  `cargo publish`.
+  `cargo publish`. Then tag that commit, so the git history shows where
+  the first version came from:
+  `git tag v0.1.0 && git push origin v0.1.0`. This version gets no GitHub
+  release or `CHANGELOG.md` entry; the changelog starts with the first
+  version released through CI.
 - [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
   *Trusted Publishing* → *Add*: owner `{{github_owner}}`, repository
   `{{project-name}}`, workflow `release-plz.yml`, environment empty.
