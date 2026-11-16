@@ -470,8 +470,9 @@ date by opening pull requests, configured in `renovate.json`:
 
 - **What it updates:** Cargo dependencies, `Cargo.lock` (a weekly refresh),
   GitHub Actions (kept pinned to exact commits), the devcontainer base image
-  (pinned by digest), the tool versions in `.devcontainer/tools.toml`, and
-  the stable toolchain in `rust-toolchain.toml`.
+  (pinned by digest), the tool versions in `.devcontainer/tools.toml`, the
+  release-plz version in `release-plz.yml`, and the stable toolchain in
+  `rust-toolchain.toml`.
 - **When:** Monday mornings before 06:00 UTC.
 - **Grouping:** one pull request for all GitHub Actions, one for the
   devcontainer (tools and base image), one for the Rust toolchain; others
@@ -617,7 +618,9 @@ Everything below is preinstalled in the devcontainer. Versions are pinned in
 | [criterion](https://bheisler.github.io/criterion.rs/book/) | Benchmark library (a dev-dependency, not a tool) | `just bench` |{% endif %}
 
 Outside the devcontainer, CI's release jobs also use
-[release-plz](https://release-plz.dev), installed on demand.
+[release-plz](https://release-plz.dev), installed by `release-plz.yml` at the
+version pinned there, together with cargo-semver-checks at the version in
+`tools.toml`.
 
 ## Configuration files
 
