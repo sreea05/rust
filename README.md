@@ -204,6 +204,9 @@ without placeholder substitution (the workflows, `justfile` and
   on this repository. It updates the actions (including those in
   `.github-project/`), tools, base image and toolchain. It can't parse the
   templated `Cargo.toml`; crate dependencies are updated in each project.
+  The cargo-generate version in `template.yml` is left alone on purpose:
+  it's the oldest version the template supports (`cargo_generate_version`
+  in `cargo-generate.toml`), so raise both together.
 
 ### Testing
 
