@@ -75,7 +75,8 @@ cargo generate --git https://github.com/sreea05/rust
 | Benchmarks? | yes | Adds `benches/` with criterion ([details](CONTRIBUTING.md#benchmarks)) |
 
 To skip the prompts, pass the answers:
-`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d uses_unsafe=false -d fuzzing=false -d benchmarks=true`.
+`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d github_owner=you -d uses_unsafe=false -d fuzzing=false -d benchmarks=true`.
+Every prompt needs an answer, or cargo-generate still asks for it.
 
 ### 2. Open it in the devcontainer
 
