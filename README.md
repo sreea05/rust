@@ -137,6 +137,22 @@ without placeholder substitution (the workflows, `justfile`, `just/` and
 can't use `{% if %}`, the commands for each optional extra live in their
 own file in `just/`, which is removed with the option.
 
+The devcontainer, the `just` commands and the git hook are for generated
+projects; they don't work in this repository, whose files still contain
+placeholders. To work on the template you need only an editor,
+cargo-generate 0.26+ and Docker (see [Testing](#testing)). The
+`CONTRIBUTING.md` here is the projects' guide, not a guide to the template:
+this section is.
+
+### Proposing a change
+
+Changes reach `main` the same way as in a project: create a branch, open a
+pull request whose title follows
+[Conventional Commits](https://www.conventionalcommits.org/) (`feat:`,
+`fix:`, `docs:`, `ci:`, `build:` ...), and squash or rebase merge it once the
+**Template** workflow passes. Keep each commit to one logical change. The
+template has no versions or releases: projects are generated from `main`.
+
 ### Protecting `main`
 
 `.github/rulesets/main.json` applies the projects' rules to this repository:
