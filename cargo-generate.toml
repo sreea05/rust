@@ -6,8 +6,9 @@ cargo_generate_version = ">=0.26.0"
 exclude = [".github-project/workflows/**", "justfile", "just/**", "release-plz.toml"]
 # The template repository's own files. The project's versions are stored
 # as README.project.md, LICENSE.project and .github-project/, and
-# post-generate.rhai moves them into place.
-ignore = ["README.md", "LICENSE", ".github"]
+# post-generate.rhai moves them into place. `.claude` holds a maintainer's
+# local Claude Code settings, which `cargo generate --path .` would copy.
+ignore = ["README.md", "LICENSE", ".github", ".claude"]
 
 [hooks]
 post = ["post-generate.rhai"]
