@@ -87,7 +87,8 @@ flowchart LR
    while you work (`just test`, `just lint`).
 3. **Commit** using [Conventional Commits](#commit-messages), e.g.
    `fix: report overflow instead of panicking`. The git hook checks
-   formatting and spelling of what you're committing.
+   spelling in the files you're committing and, when they include Rust or
+   TOML files, the formatting of the whole repository.
 4. **Run `just ci`** before pushing. It runs everything CI runs on a pull
    request.
 5. **Push and open a pull request.** CI runs every check. Fix anything that
