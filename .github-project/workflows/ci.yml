@@ -80,9 +80,6 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    env:
-      # Upload to Codecov only if the CODECOV_TOKEN secret is set.
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -106,14 +103,6 @@ jobs:
             cat target/coverage-summary.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload to Codecov
-        if: env.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        with:
-          files: target/lcov.info
-          token: ${{ env.CODECOV_TOKEN }}
-          fail_ci_if_error: true
 
   # Fails when the PR breaks the public API. Don't make it a required check:
   # a failure means the commit should be marked breaking (`feat!:`), so
