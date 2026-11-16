@@ -485,7 +485,7 @@ repository contents and pull requests.
 ## Dependency updates
 
 [Renovate](https://docs.renovatebot.com) keeps every pinned version up to
-date by opening pull requests, configured in `renovate.json`:
+date by opening pull requests, configured in `renovate.json5`:
 
 - **What it updates:** Cargo dependencies, `Cargo.lock` (a weekly refresh),
   GitHub Actions (kept pinned to exact commits), the devcontainer base image
@@ -664,7 +664,7 @@ version pinned there, together with cargo-semver-checks at the version in
 | `.config/nextest.toml` | Test runner settings |
 | `lefthook.yml` | Git hook |
 | `release-plz.toml` | Release settings |
-| `renovate.json` | Dependency update rules |
+| `renovate.json5` | Dependency update rules |
 | `.vscode/` | Editor settings and recommended extensions |
 | `CHANGELOG.md` | Release history, written by release-plz |
 | `SECURITY.md` | How to report vulnerabilities |

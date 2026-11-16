@@ -1,3 +1,8 @@
+// Renovate: https://docs.renovatebot.com. JSON5, so comments are allowed.
+// The template repository and every generated project share this file, so
+// it also matches `.github-project/`, where the template keeps the project's
+// workflows. In a project that directory doesn't exist and those patterns
+// match nothing.
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
@@ -9,6 +14,7 @@
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
   "minimumReleaseAge": "14 days",
+  // Added to the default `.github/workflows/`; only matters in the template.
   "github-actions": {
     "managerFilePatterns": ["/(^|/)\\.github-project/workflows/[^/]+\\.ya?ml$/"]
   },
@@ -50,6 +56,7 @@
     {
       "description": "release-plz, installed by the release workflow",
       "customType": "regex",
+      // `.github-project/` is the template's copy of the project's workflows.
       "managerFilePatterns": ["/^\\.github(-project)?/workflows/release-plz\\.yml$/"],
       "matchStrings": ["release-plz@(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "release-plz",
