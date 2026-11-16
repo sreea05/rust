@@ -11,10 +11,9 @@ commit.
 check is one `just` command, and CI runs the same commands in the same
 image. What passes on your machine passes in CI.
 
-- **This README:** what the template provides, how to create a crate, and
-  how to set up its repository.
+- **This README:** what the template provides and how to create a crate.
 - **[CONTRIBUTING.md](CONTRIBUTING.md):** how a generated project works,
-  in detail. Every project gets its own copy, describing only the options
+  in detail, including how to set up its repository. Every project gets its own copy, describing only the options
   you chose. Read here, it still shows the template's placeholders, such as
   `{{project-name}}`, and `{% if %}` tags around the parts that depend on an
   option.
@@ -96,62 +95,12 @@ their names in `Cargo.toml` and `fuzz/Cargo.toml`. Run `just ci` again.
 
 ### 4. Set up the repository
 
-Work through the checklist below.
-
-## New repository checklist
-
-### Once, before your first crate
-
-- [ ] **Create the release bot**, a GitHub App you own. Releases need it:
-  GitHub doesn't run CI for pull requests opened with a workflow's own token
-  ([why](CONTRIBUTING.md#why-a-release-bot)). One app serves all your
-  repositories.
-  1. GitHub → your profile → *Settings* → *Developer settings* →
-     *GitHub Apps* → *New GitHub App*.
-  2. Name it (e.g. `sreea05-release-bot`), set any homepage URL, and untick
-     *Webhook → Active*.
-  3. Under *Repository permissions* set **Contents** and **Pull requests**
-     to *Read and write*. Choose *Only on this account*, then *Create*.
-  4. Note the **Client ID** and click *Generate a private key* (downloads a
-     `.pem` file). Keep both; every repository needs them.
-
-### For each new repository
-
-- [ ] **Fill in `keywords` and `categories`** in `Cargo.toml` (up to 5 of
-  each; categories from <https://crates.io/category_slugs>), so the crate can
-  be found on crates.io.
-- [ ] **Create the GitHub repository** (empty: no README or license), commit
-  everything **including `Cargo.lock`**, and push to `main`.
-- [ ] **Protect `main`** (after the first push, since it blocks pushing to
-  `main`): *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a
-  ruleset* → `.github/rulesets/main.json` → *Create*.
-- [ ] **Merge settings:** *Settings* → *General* → *Pull Requests*: untick
-  *Allow merge commits*, tick *Automatically delete head branches*.
-- [ ] **Connect the release bot:** install your app on the repository (app
-  settings → *Install App*), then in *Settings* → *Secrets and variables* →
-  *Actions* add the **variable** `RELEASE_APP_CLIENT_ID` (the Client ID) and
-  the **secret** `RELEASE_APP_PRIVATE_KEY` (the whole `.pem` file).
-- [ ] **Install Renovate:** <https://github.com/apps/renovate> → *Configure* →
-  add the repository.
-- [ ] **Enable private vulnerability reporting:** *Settings* → *Advanced
-  Security* (*Code security* on some accounts) → *Private vulnerability
-  reporting* → *Enable*.
-- [ ] **Public repositories only:** make the devcontainer image public, so
-  pull requests from forks can use it. After the first CI run: repository →
-  *Packages* → *devcontainer* → *Package settings* → *Change visibility*.
-
-### Before the first release
-
-- [ ] **Publish the first version by hand.** Publishing from CI only works
-  for crates that already exist on crates.io. From an up-to-date `main`:
-  `cargo login` (token from <https://crates.io/settings/tokens>), then
-  `cargo publish`.
-- [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
-  *Trusted Publishing* → *Add*: your GitHub owner and repository name,
-  workflow `release-plz.yml`, environment empty.
-
-From then on, releases start with a `release/*` branch; see
-[Releases](CONTRIBUTING.md#releases).
+Follow [Repository setup](CONTRIBUTING.md#repository-setup) in the
+project's `CONTRIBUTING.md`: create the release bot (once per account),
+create and protect the repository, connect the release bot and Renovate,
+and publish the first version by hand. Every project gets this checklist
+in its own `CONTRIBUTING.md`, filled in with its names, so it's still there
+when you or another maintainer need it later.
 
 ## Troubleshooting
 
@@ -162,10 +111,6 @@ Problems in a generated project are covered in its
 `README.project.md`, `LICENSE.project` or `.github-project/`.**
 cargo-generate is older than 0.26. Update it
 (`cargo install cargo-generate --force`) and generate again.
-
-**The first push to `main` is rejected.**
-The ruleset is already active. Disable it temporarily (*Settings* → *Rules*
-→ *Rulesets*), push, and enable it again.
 
 ## Working on the template
 

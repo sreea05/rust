@@ -24,7 +24,8 @@ CI, and any CI failure can be reproduced with one command.
 11. [Project rules](#project-rules)
 12. [Tools](#tools)
 13. [Configuration files](#configuration-files)
-14. [Troubleshooting](#troubleshooting)
+14. [Repository setup](#repository-setup)
+15. [Troubleshooting](#troubleshooting)
 
 ## Getting started
 
@@ -385,7 +386,8 @@ calling workflow, and GitHub and zizmor treat it as pinned.
 ## The protected `main` branch
 
 `main` is protected by the ruleset in `.github/rulesets/main.json` (imported
-once into the repository settings). It enforces:
+once into the repository settings; see [Repository setup](#repository-setup)).
+It enforces:
 
 - **No direct pushes:** every change arrives through a pull request.
 - **No force pushes and no deletion** of `main`.
@@ -476,8 +478,9 @@ GitHub deliberately doesn't run workflows for commits and pull requests made
 with a workflow's built-in token. Since `main` requires passing CI, a release
 pull request opened that way could never be merged. The release workflow
 therefore acts as a GitHub App you own (the release bot), configured through
-the `RELEASE_APP_CLIENT_ID` variable and `RELEASE_APP_PRIVATE_KEY` secret.
-Its token is limited to repository contents and pull requests.
+the `RELEASE_APP_CLIENT_ID` variable and `RELEASE_APP_PRIVATE_KEY` secret
+(see [Repository setup](#repository-setup)). Its token is limited to
+repository contents and pull requests.
 
 ## Dependency updates
 
@@ -666,6 +669,66 @@ version pinned there, together with cargo-semver-checks at the version in
 | `CHANGELOG.md` | Release history, written by release-plz |
 | `SECURITY.md` | How to report vulnerabilities |
 
+## Repository setup
+
+The maintainer does this once, when the repository is created; contributors
+can skip it. CI, releases and dependency updates depend on these settings,
+which live in GitHub and crates.io rather than in the repository.
+
+### The release bot (once per GitHub account)
+
+Releases need a GitHub App you own ([why](#why-a-release-bot)). One app
+serves all your repositories; skip this if you already have one.
+
+1. GitHub → your profile → *Settings* → *Developer settings* →
+   *GitHub Apps* → *New GitHub App*.
+2. Name it (e.g. `{{github_owner}}-release-bot`), set any homepage URL, and
+   untick *Webhook → Active*.
+3. Under *Repository permissions* set **Contents** and **Pull requests**
+   to *Read and write*. Choose *Only on this account*, then *Create*.
+4. Note the **Client ID** and click *Generate a private key* (downloads a
+   `.pem` file). Keep both; every repository needs them.
+
+### The repository
+
+- [ ] **Fill in `keywords` and `categories`** in `Cargo.toml` (up to 5 of
+  each; categories from <https://crates.io/category_slugs>), so the crate can
+  be found on crates.io.
+- [ ] **Create the GitHub repository** (empty: no README or license), commit
+  everything **including `Cargo.lock`**, and push to `main`.
+- [ ] **Protect `main`** (after the first push, since it blocks pushing to
+  `main`): *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a
+  ruleset* → `.github/rulesets/main.json` → *Create*. If the first push is
+  rejected, the ruleset is already active: disable it, push, and enable it
+  again.
+- [ ] **Merge settings:** *Settings* → *General* → *Pull Requests*: untick
+  *Allow merge commits*, tick *Automatically delete head branches*.
+- [ ] **Connect the release bot:** install your app on the repository (app
+  settings → *Install App*), then in *Settings* → *Secrets and variables* →
+  *Actions* add the **variable** `RELEASE_APP_CLIENT_ID` (the Client ID) and
+  the **secret** `RELEASE_APP_PRIVATE_KEY` (the whole `.pem` file).
+- [ ] **Install Renovate:** <https://github.com/apps/renovate> → *Configure* →
+  add the repository.
+- [ ] **Enable private vulnerability reporting:** *Settings* → *Advanced
+  Security* (*Code security* on some accounts) → *Private vulnerability
+  reporting* → *Enable*.
+- [ ] **Public repositories only:** make the devcontainer image public, so
+  pull requests from forks can use it. After the first CI run: repository →
+  *Packages* → *devcontainer* → *Package settings* → *Change visibility*.
+
+### Before the first release
+
+- [ ] **Publish the first version by hand.** Publishing from CI only works
+  for crates that already exist on crates.io. From an up-to-date `main`:
+  `cargo login` (token from <https://crates.io/settings/tokens>), then
+  `cargo publish`.
+- [ ] **Enable trusted publishing:** on crates.io, the crate → *Settings* →
+  *Trusted Publishing* → *Add*: owner `{{github_owner}}`, repository
+  `{{project-name}}`, workflow `release-plz.yml`, environment empty.
+
+From then on, releases start with a `release/*` branch; see
+[Releases](#releases).
+
 ## Troubleshooting
 
 **CI fails with "cannot create the lock file … because --locked was passed".**
@@ -683,8 +746,8 @@ intended, mark the commit as breaking (`feat!:`); otherwise restore
 compatibility. It isn't required for merging.
 
 **The release workflow says "Set up the release bot first".**
-The `RELEASE_APP_CLIENT_ID` variable isn't set; see *Why a release bot*
-under [Releases](#releases).
+The `RELEASE_APP_CLIENT_ID` variable isn't set; follow *Connect the release
+bot* in [Repository setup](#repository-setup).
 
 **Pushing a `release/*` branch didn't open a pull request.**
 Check the *Release* workflow run. "Nothing to release" means there are no
