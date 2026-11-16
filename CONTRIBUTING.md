@@ -580,8 +580,10 @@ give the title the right type.
   `rust-toolchain.toml`. Renovate proposes each new stable release.
 - **Minimum supported Rust version (MSRV)** is `rust-version` in
   `Cargo.toml`: roughly the last six months of releases (stable minus 4).
-  Raising it is a minor-version change; note it in the changelog. Clippy
-  reads it too, and won't suggest APIs newer than the MSRV.
+  Raising it isn't a breaking change: commit it as a feature, e.g.
+  `feat: require Rust 1.97`, so it's listed in the changelog and bumps the
+  minor version (the patch version before 1.0). Clippy reads it too, and
+  won't suggest APIs newer than the MSRV.
 - **Nightly** is a dated build pinned in `.devcontainer/tools.toml`, used for
   docs (as docs.rs does){% if uses_unsafe %}, Miri{% endif %}{% if fuzzing %} and fuzzing{% endif %}. Renovate can't update it: every few
   months, set a newer date from

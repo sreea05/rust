@@ -3,7 +3,7 @@ name = "{{project-name}}"
 version = "0.1.0"
 edition = "2024"
 # MSRV: about the last six months of stable Rust (stable minus 4).
-# Raising it is a minor-version change.
+# Raising it is a `feat:` commit, not a breaking change (see CONTRIBUTING.md).
 rust-version = "1.96"
 description = "{{description}}"
 license = "MIT"
