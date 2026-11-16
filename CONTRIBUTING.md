@@ -198,10 +198,12 @@ configured, and how to change it.
 
 ### Coverage
 
-- **Shows:** which lines, functions and branches the tests exercise.
+- **Shows:** which lines and functions the tests exercise. (Branch
+  coverage needs nightly, so the summary's branch columns stay empty.)
 - **Run:** `just cov`. It writes `target/lcov.info` (for editors and
   other coverage tools) and prints a summary table. Doc tests aren't counted.
-- **In CI:** the summary appears on the run's summary page.
+- **In CI:** the summary appears on the run's summary page. There's no
+  minimum percentage: the `coverage` job only fails if a test fails.
 
 ### Minimum supported Rust version (MSRV)
 
