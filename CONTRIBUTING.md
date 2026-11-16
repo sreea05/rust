@@ -345,6 +345,11 @@ Each workflow first calls `devcontainer.yml`, which:
 3. hands the other jobs the image's exact digest, so every job runs the
    same image even if the tag is overwritten meanwhile.
 
+Workflows call it with `uses: $/.github/workflows/devcontainer.yml`. The
+`$/` prefix is GitHub's self-repository syntax: like `./`, it means this
+repository, but it always loads the file from the same commit as the
+calling workflow, and GitHub and zizmor treat it as pinned.
+
 ### Details
 
 - **Coverage** writes its summary to the run's summary page{% if codecov %} and uploads
