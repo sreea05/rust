@@ -44,8 +44,8 @@ image. What passes on your machine passes in CI.
   by Renovate.
 - **[Security](CONTRIBUTING.md#security-measures):** everything pinned,
   least-privilege workflows, verified downloads.
-- **Optional extras**, chosen when generating: Miri, fuzzing, benchmarks,
-  Codecov.
+- **Optional extras**, chosen when generating: Miri, fuzzing and
+  benchmarks.
 
 ## Create a new crate
 
@@ -73,10 +73,9 @@ cargo generate --git https://github.com/sreea05/rust
 | Uses `unsafe`? | no | No: `unsafe` is forbidden. Yes: allowed per module with mandatory safety comments, plus [Miri](CONTRIBUTING.md#miri) in CI |
 | Fuzzing? | no | Adds `fuzz/` and a CI fuzz run ([details](CONTRIBUTING.md#fuzzing)) |
 | Benchmarks? | yes | Adds `benches/` with criterion ([details](CONTRIBUTING.md#benchmarks)) |
-| Codecov? | no | Uploads coverage to Codecov and adds its badge |
 
 To skip the prompts, pass the answers:
-`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d uses_unsafe=false -d fuzzing=false -d benchmarks=true -d codecov=false`.
+`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d uses_unsafe=false -d fuzzing=false -d benchmarks=true`.
 
 ### 2. Open it in the devcontainer
 
@@ -138,8 +137,6 @@ Work through the checklist below.
 - [ ] **Public repositories only:** make the devcontainer image public, so
   pull requests from forks can use it. After the first CI run: repository →
   *Packages* → *devcontainer* → *Package settings* → *Change visibility*.
-- [ ] **Codecov (if enabled):** add the repository at <https://codecov.io>
-  and save its upload token as the repository secret `CODECOV_TOKEN`.
 
 ### Before the first release
 
@@ -228,7 +225,7 @@ one). To do the same locally:
 
 ```sh
 cargo generate --path . --name demo-lib -d description=Demo -d github_owner=you \
-  -d uses_unsafe=true -d fuzzing=true -d benchmarks=true -d codecov=true
+  -d uses_unsafe=true -d fuzzing=true -d benchmarks=true
 cd demo-lib
 docker build -f .devcontainer/Dockerfile -t demo-lib-dev .
 docker run --rm -v "$PWD":/work -w /work demo-lib-dev bash -c 'just setup && just ci'

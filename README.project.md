@@ -3,9 +3,6 @@
 [![CI](https://github.com/{{github_owner}}/{{project-name}}/actions/workflows/ci.yml/badge.svg)](https://github.com/{{github_owner}}/{{project-name}}/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/{{project-name}}.svg)](https://crates.io/crates/{{project-name}})
 [![docs.rs](https://img.shields.io/docsrs/{{project-name}})](https://docs.rs/{{project-name}})
-{% if codecov -%}
-[![codecov](https://codecov.io/gh/{{github_owner}}/{{project-name}}/graph/badge.svg)](https://codecov.io/gh/{{github_owner}}/{{project-name}})
-{% endif -%}
 [![MSRV](https://img.shields.io/crates/msrv/{{project-name}})](Cargo.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 

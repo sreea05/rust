@@ -37,11 +37,6 @@ type = "bool"
 prompt = "Add criterion benchmarks?"
 default = true
 
-[placeholders.codecov]
-type = "bool"
-prompt = "Upload coverage to Codecov?"
-default = false
-
 [conditional.'!uses_unsafe']
 ignore = [".github-project/workflows/miri.yml"]
 
@@ -50,6 +45,3 @@ ignore = ["fuzz", ".github-project/workflows/fuzz.yml"]
 
 [conditional.'!benchmarks']
 ignore = ["benches"]
-
-[conditional.'!codecov']
-ignore = ["codecov.yml"]
