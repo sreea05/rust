@@ -78,7 +78,8 @@ jobs:
         run: |
           # shellcheck disable=SC2086 # DEFINES holds several arguments
           cargo generate --path . --name demo-lib --destination "$RUNNER_TEMP" --silent \
-            -d description="Template test" -d github_owner=example $DEFINES
+            -d description="Template test" -d github_owner=example \
+            -d contact_email=maintainer@example.com $DEFINES
 
       - name: Build devcontainer image
         working-directory: ${{ runner.temp }}/demo-lib
