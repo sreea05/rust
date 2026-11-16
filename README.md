@@ -200,3 +200,13 @@ docker run --rm -v "$PWD":/work -w /work demo-lib-dev bash -c 'just setup && jus
 
 `--path .` copies your working copy as it is, including uncommitted and
 untracked files.
+
+### Existing projects
+
+A generated project is a copy, not a link: changes to the template never
+reach crates generated earlier. Renovate keeps each project's pinned
+versions current, but anything else (a new check, a workflow fix, a
+documentation change) must be applied by hand. To see what changed,
+generate a fresh project with the same name and answers, compare it with
+the existing one (e.g. `diff -r --exclude=.git new-project existing-project`),
+and copy over the parts you want.
