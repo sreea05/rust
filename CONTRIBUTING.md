@@ -89,8 +89,9 @@ flowchart LR
    `fix: report overflow instead of panicking`. The git hook checks
    spelling in the files you're committing and, when they include Rust or
    TOML files, the formatting of the whole repository.
-4. **Run `just ci`** before pushing. It runs everything CI runs on a pull
-   request.
+4. **Run `just ci`** before pushing. It runs every check in the CI
+   workflow.{% if uses_unsafe or fuzzing %} The slower checks that have their own workflows aren't
+   included; run them too:{% if uses_unsafe %} `just miri`{% endif %}{% if uses_unsafe and fuzzing %} and{% endif %}{% if fuzzing %} `just fuzz`{% endif %}.{% endif %}
 5. **Push and open a pull request.** CI runs every check. Fix anything that
    fails; each failing job names the `just` command to reproduce it.
 6. **Merge** with **Squash and merge** or **Rebase and merge** once CI
@@ -109,7 +110,7 @@ this is the single place where each command is written. Run `just` to list them.
 | Command | What it does |
 |---|---|
 | `just setup` | One-time setup: creates `Cargo.lock` if missing and installs the git hook |
-| `just ci` | Every check CI runs on a pull request: `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `cov`, `semver` |
+| `just ci` | Every check in the CI workflow: `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `cov`, `semver`{% if uses_unsafe and fuzzing %} (not `miri` or `fuzz`: each has its own workflow){% elsif uses_unsafe %} (not `miri`: it has its own workflow){% elsif fuzzing %} (not `fuzz`: it has its own workflow){% endif %} |
 | `just fmt` | Formats all Rust and TOML files in place |
 | `just lint` | Formatting check, clippy, TOML formatting check, spelling, workflow audit |
 | `just fmt-check` / `just clippy` / `just toml-check` / `just typos` / `just zizmor` | The individual parts of `just lint` |

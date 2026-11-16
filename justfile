@@ -17,7 +17,10 @@ setup:
     cargo fetch
     lefthook install
 
-# Run every check CI runs on a pull request.
+# Miri and fuzzing, when a project has them, are separate recipes with their
+# own workflows: they're too slow to run on every `just ci`.
+
+# Run every check in the CI workflow.
 ci: lint test msrv hack doc deny cov semver
 
 # --- Formatting and linting -------------------------------------------------
