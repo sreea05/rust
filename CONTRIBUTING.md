@@ -385,9 +385,12 @@ calling workflow, and GitHub and zizmor treat it as pinned.
 
 ## The protected `main` branch
 
-`main` is protected by the ruleset in `.github/rulesets/main.json` (imported
-once into the repository settings; see [Repository setup](#repository-setup)).
-It enforces:
+`main` is protected by a ruleset stored in the repository's GitHub settings.
+`.github/rulesets/main.json` is a copy of it, kept so it can be imported
+into a new repository and reviewed like code. Editing the file doesn't
+change the rules. To check that the rules are active, open *Settings* →
+*Rules* → *Rulesets*: **Protect main** should show as *Active*. If it's
+missing, follow [Repository setup](#repository-setup). It enforces:
 
 - **No direct pushes:** every change arrives through a pull request.
 - **No force pushes and no deletion** of `main`.
@@ -399,9 +402,9 @@ It enforces:
   pull requests once CI passes.
 - **No exceptions:** nobody can bypass these rules, administrators included.
 
-To change the rules, edit them in the repository settings (*Settings* →
-*Rules* → *Rulesets*), and export them back to `main.json` so the file stays
-accurate.
+To change the rules, edit **Protect main** in *Settings* → *Rules* →
+*Rulesets*, then use *Export ruleset* and commit the downloaded file as
+`.github/rulesets/main.json`, so the copy stays accurate.
 
 ## Releases
 
@@ -696,13 +699,26 @@ serves all your repositories; skip this if you already have one.
   be found on crates.io.
 - [ ] **Create the GitHub repository** (empty: no README or license), commit
   everything **including `Cargo.lock`**, and push to `main`.
-- [ ] **Protect `main`** (after the first push, since it blocks pushing to
-  `main`): *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a
-  ruleset* → `.github/rulesets/main.json` → *Create*. If the first push is
-  rejected, the ruleset is already active: disable it, push, and enable it
-  again.
-- [ ] **Merge settings:** *Settings* → *General* → *Pull Requests*: untick
-  *Allow merge commits*, tick *Automatically delete head branches*.
+- [ ] **Protect `main`.** Do this after the first push: once it's active,
+  nobody can push to `main` directly. `.github/rulesets/main.json` does
+  nothing while it only sits in the repository; GitHub applies it only once
+  you import it. On the repository's GitHub page:
+  1. *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a
+     ruleset*.
+  2. Select `.github/rulesets/main.json` from your local clone, then click
+     *Create*.
+  3. Check: *Rulesets* now lists **Protect main** as *Active*.
+
+  If a push to `main` was rejected because the ruleset was imported too
+  early, set it to *Disabled*, push, and set it back to *Active*.
+- [ ] **Merge settings.** The ruleset rejects merge commits, but the merge
+  button keeps offering them until you turn them off. *Settings* →
+  *General* → *Pull Requests*:
+  1. Untick *Allow merge commits*. Leave *Allow squash merging* and *Allow
+     rebase merging* ticked.
+  2. Tick *Automatically delete head branches*.
+  3. Check: the merge button on a pull request offers only *Squash and
+     merge* and *Rebase and merge*.
 - [ ] **Connect the release bot:** install your app on the repository (app
   settings → *Install App*), then in *Settings* → *Secrets and variables* →
   *Actions* add the **variable** `RELEASE_APP_CLIENT_ID` (the Client ID) and

@@ -155,13 +155,29 @@ template has no versions or releases: projects are generated from `main`.
 
 ### Protecting `main`
 
-`.github/rulesets/main.json` applies the projects' rules to this repository:
-pull requests only, squash or rebase merges, and the **Template** workflow's
-checks (`workflow audit`, `minimal`, `full`) must pass. Import it once:
-*Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a ruleset*.
-Also untick *Allow merge commits* under *Settings* → *General* → *Pull
-Requests*. If you rename a job in `template.yml`, update the check names in
-the ruleset too.
+This repository's `main` follows the same rules as a project's: changes
+arrive only through pull requests, merges are squash or rebase, and the
+**Template** workflow's checks (`workflow audit`, `minimal`, `full`) must
+pass. The rules are stored in GitHub's settings, not in git:
+`.github/rulesets/main.json` does nothing until it's imported. Set them up
+once on the repository's GitHub page:
+
+1. *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a ruleset*.
+   Select `.github/rulesets/main.json` from your local clone, then click
+   *Create*.
+2. *Settings* → *General* → *Pull Requests*: untick *Allow merge commits*
+   (the ruleset rejects merge commits, but the merge button keeps offering
+   them until you turn them off) and tick *Automatically delete head
+   branches*.
+3. Check: *Rulesets* lists **Protect main** as *Active*, and a pull
+   request's merge button offers only *Squash and merge* and *Rebase and
+   merge*.
+
+If you rename a job in `template.yml`, update its name under *Require
+status checks to pass* in **Protect main** on GitHub, or pull requests wait
+forever for the old check. After any change to the rules on GitHub, use
+*Export ruleset* on its settings page and commit the downloaded file as
+`.github/rulesets/main.json`, so the copy stays accurate.
 
 ### Making changes
 
