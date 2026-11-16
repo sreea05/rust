@@ -120,16 +120,10 @@ place where each command is written. Run `just` to list them.
 | `just cov` | Measures test coverage; writes `target/lcov.info` and prints a summary |
 | `just semver [baseline]` | Fails if the public API breaks compared with `baseline` (default `origin/main`) |
 | `just test-latest` | Updates `Cargo.lock` to the newest compatible dependencies, then tests |
-| `just test-toolchain <name>` | Tests on another toolchain, e.g. `just test-toolchain beta` |
-{%- if benchmarks %}
-| `just bench [args]` | Runs the benchmarks; e.g. `just bench -- --save-baseline main` |
-{%- endif %}
-{%- if uses_unsafe %}
-| `just miri` | Runs the tests under Miri to detect undefined behaviour |
-{%- endif %}
-{%- if fuzzing %}
-| `just fuzz [seconds]` | Runs each fuzz target for the given time (default 60 seconds each) |
-{%- endif %}
+| `just test-toolchain <name>` | Tests on another toolchain, e.g. `just test-toolchain beta` |{% if benchmarks %}
+| `just bench [args]` | Runs the benchmarks; e.g. `just bench -- --save-baseline main` |{% endif %}{% if uses_unsafe %}
+| `just miri` | Runs the tests under Miri to detect undefined behaviour |{% endif %}{% if fuzzing %}
+| `just fuzz [seconds]` | Runs each fuzz target for the given time (default 60 seconds each) |{% endif %}
 
 ## Checks in detail
 
@@ -316,13 +310,9 @@ can be reproduced locally by running that command in the devcontainer.
 
 | Workflow | Runs when | Jobs |
 |---|---|---|
-| **CI** (`ci.yml`) | Every pull request, every merge to `main`, the merge queue | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on pull requests also `semver` |
-{%- if uses_unsafe %}
-| **Miri** (`miri.yml`) | Every pull request, every merge to `main`, the merge queue | `miri` |
-{%- endif %}
-{%- if fuzzing %}
-| **Fuzz** (`fuzz.yml`) | Every pull request, every merge to `main`, the merge queue; also manually with a chosen duration | `fuzz` |
-{%- endif %}
+| **CI** (`ci.yml`) | Every pull request, every merge to `main`, the merge queue | `lint`, `test`, `msrv`, `hack`, `doc`, `deny`, `coverage`; on pull requests also `semver` |{% if uses_unsafe %}
+| **Miri** (`miri.yml`) | Every pull request, every merge to `main`, the merge queue | `miri` |{% endif %}{% if fuzzing %}
+| **Fuzz** (`fuzz.yml`) | Every pull request, every merge to `main`, the merge queue; also manually with a chosen duration | `fuzz` |{% endif %}
 | **Scheduled** (`scheduled.yml`) | Mondays at 06:00 UTC, or manually | Image rebuild, beta and nightly tests, newest-dependency tests, dependency audit, image cleanup |
 | **Release** (`release-plz.yml`) | A `release/*` branch is created; its pull request is merged | Prepare release PR; publish release |
 | **Devcontainer image** (`devcontainer.yml`) | Called by the workflows above | Builds or reuses the image |
@@ -619,16 +609,10 @@ Everything below is preinstalled in the devcontainer. Versions are pinned in
 | [lefthook](https://lefthook.dev) | Runs fast checks as a git hook | `just setup` |
 | [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) | Installs the tools above as prebuilt binaries | devcontainer build |
 | MSRV toolchain | Builds with the oldest supported Rust version | `just msrv` |
-| Nightly toolchain | Builds docs the way docs.rs does{% if uses_unsafe %}; runs Miri{% endif %}{% if fuzzing %}; runs fuzzing{% endif %} | `just doc`{% if uses_unsafe %}, `just miri`{% endif %}{% if fuzzing %}, `just fuzz`{% endif %} |
-{%- if uses_unsafe %}
-| [Miri](https://github.com/rust-lang/miri) | Detects undefined behaviour in unsafe code | `just miri` |
-{%- endif %}
-{%- if fuzzing %}
-| [cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html) | Runs the fuzz targets with libFuzzer | `just fuzz` |
-{%- endif %}
-{%- if benchmarks %}
-| [criterion](https://bheisler.github.io/criterion.rs/book/) | Benchmark library (a dev-dependency, not a tool) | `just bench` |
-{%- endif %}
+| Nightly toolchain | Builds docs the way docs.rs does{% if uses_unsafe %}; runs Miri{% endif %}{% if fuzzing %}; runs fuzzing{% endif %} | `just doc`{% if uses_unsafe %}, `just miri`{% endif %}{% if fuzzing %}, `just fuzz`{% endif %} |{% if uses_unsafe %}
+| [Miri](https://github.com/rust-lang/miri) | Detects undefined behaviour in unsafe code | `just miri` |{% endif %}{% if fuzzing %}
+| [cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html) | Runs the fuzz targets with libFuzzer | `just fuzz` |{% endif %}{% if benchmarks %}
+| [criterion](https://bheisler.github.io/criterion.rs/book/) | Benchmark library (a dev-dependency, not a tool) | `just bench` |{% endif %}
 
 Outside the devcontainer, CI's release jobs also use
 [release-plz](https://release-plz.dev), installed on demand.
@@ -655,10 +639,8 @@ Outside the devcontainer, CI's release jobs also use
 | `.config/nextest.toml` | Test runner settings |
 | `lefthook.yml` | Git hook |
 | `release-plz.toml` | Release settings |
-| `renovate.json` | Dependency update rules |
-{%- if codecov %}
-| `codecov.yml` | Codecov thresholds and pull request comments |
-{%- endif %}
+| `renovate.json` | Dependency update rules |{% if codecov %}
+| `codecov.yml` | Codecov thresholds and pull request comments |{% endif %}
 | `.vscode/` | Editor settings and recommended extensions |
 | `CHANGELOG.md` | Release history, written by release-plz |
 | `SECURITY.md` | How to report vulnerabilities |
