@@ -8,7 +8,7 @@
 # Ordinary merges to main never trigger a release.
 #
 # Needs the release bot (RELEASE_APP_CLIENT_ID variable and
-# RELEASE_APP_PRIVATE_KEY secret, see README): commits and pull requests made
+# RELEASE_APP_PRIVATE_KEY secret, see CONTRIBUTING.md): commits and pull requests made
 # with the default token don't trigger CI, so the release PR could never
 # pass its required checks.
 name: Release
@@ -38,7 +38,7 @@ jobs:
           CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
         run: |
           if [[ -z "$CLIENT_ID" ]]; then
-            echo "::error::Set up the release bot first (README → New repository checklist)."
+            echo "::error::Set up the release bot first (CONTRIBUTING.md → Repository setup)."
             exit 1
           fi
 
