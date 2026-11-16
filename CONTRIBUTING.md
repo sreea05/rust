@@ -58,11 +58,18 @@ just ci
 1. Install Rust with [rustup](https://rustup.rs). Inside the repository,
    rustup reads `rust-toolchain.toml` and installs the pinned version
    automatically.
-2. Install the [tools](#tools) at the versions listed in
-   `.devcontainer/tools.toml` (for example with
-   [cargo-binstall](https://github.com/cargo-bins/cargo-binstall):
-   `cargo binstall just@<version> cargo-nextest@<version> ...`).
-3. Run `just setup`, then `just ci`.
+2. Install the pinned nightly toolchain, with the components listed next
+   to it in `.devcontainer/tools.toml`:
+   `rustup toolchain install nightly-<date> --component rust-src{% if uses_unsafe %},miri{% endif %}`.
+   The MSRV toolchain is installed by `just msrv` when needed.
+3. Install the [tools](#tools) at the versions in `.devcontainer/tools.toml`:
+   - everything under `[crates]` with
+     [cargo-binstall](https://github.com/cargo-bins/cargo-binstall), e.g.
+     `cargo binstall just@<version> cargo-nextest@<version> ...`;
+   - [lefthook](https://lefthook.dev) and [taplo](https://taplo.tamasfe.dev),
+     under `[bootstrap]`, from their GitHub releases (see
+     `.devcontainer/install-tools.sh` for the download URLs).
+4. Run `just setup`, then `just ci`.
 
 Versions that differ from `tools.toml` may give different results from CI.
 
