@@ -15,7 +15,9 @@ image. What passes on your machine passes in CI.
   how to set up its repository.
 - **[CONTRIBUTING.md](CONTRIBUTING.md):** how a generated project works,
   in detail. Every project gets its own copy, describing only the options
-  you chose.
+  you chose. Read here, it still shows the template's placeholders, such as
+  `{{project-name}}`, and `{% if %}` tags around the parts that depend on an
+  option.
 
 ## What you get
 
