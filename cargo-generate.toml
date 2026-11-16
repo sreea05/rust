@@ -22,6 +22,11 @@ type = "string"
 prompt = "GitHub user or organisation that will own the repository"
 default = "sreea05"
 
+[placeholders.contact_email]
+type = "string"
+prompt = "Email address for private code-of-conduct reports"
+regex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+
 [placeholders.uses_unsafe]
 type = "bool"
 prompt = "Will this crate contain `unsafe` code? (enables Miri)"

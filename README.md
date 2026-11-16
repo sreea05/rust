@@ -70,12 +70,13 @@ cargo generate --git https://github.com/sreea05/rust
 | Project name | — | Crate and repository name |
 | Description | `A Rust library` | Used in `Cargo.toml`, the README and the crate docs |
 | GitHub owner | `sreea05` | Repository URLs, badges, CODEOWNERS, license |
+| Contact email | — | Where `CODE_OF_CONDUCT.md` asks people to send reports |
 | Uses `unsafe`? | no | No: `unsafe` is forbidden. Yes: allowed per module with mandatory safety comments, plus [Miri](CONTRIBUTING.md#miri) in CI |
 | Fuzzing? | no | Adds `fuzz/` and a CI fuzz run ([details](CONTRIBUTING.md#fuzzing)) |
 | Benchmarks? | yes | Adds `benches/` with criterion ([details](CONTRIBUTING.md#benchmarks)) |
 
 To skip the prompts, pass the answers:
-`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d github_owner=you -d uses_unsafe=false -d fuzzing=false -d benchmarks=true`.
+`cargo generate --git https://github.com/sreea05/rust --name my-crate -d description="Does a thing" -d github_owner=you -d contact_email=you@example.com -d uses_unsafe=false -d fuzzing=false -d benchmarks=true`.
 Every prompt needs an answer, or cargo-generate still asks for it.
 
 ### 2. Open it in the devcontainer
@@ -230,7 +231,7 @@ one). To do the same locally:
 
 ```sh
 cargo generate --path . --name demo-lib -d description=Demo -d github_owner=you \
-  -d uses_unsafe=true -d fuzzing=true -d benchmarks=true
+  -d contact_email=you@example.com -d uses_unsafe=true -d fuzzing=true -d benchmarks=true
 cd demo-lib
 docker build -f .devcontainer/Dockerfile -t demo-lib-dev .
 docker run --rm -v "$PWD":/work -w /work demo-lib-dev bash -c 'just setup && just ci'
