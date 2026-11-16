@@ -165,13 +165,11 @@ once on the repository's GitHub page:
 1. *Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a ruleset*.
    Select `.github/rulesets/main.json` from your local clone, then click
    *Create*.
-2. *Settings* → *General* → *Pull Requests*: untick *Allow merge commits*
-   (the ruleset rejects merge commits, but the merge button keeps offering
-   them until you turn them off) and tick *Automatically delete head
-   branches*.
-3. Check: *Rulesets* lists **Protect main** as *Active*, and a pull
+2. Check: *Rulesets* lists **Protect main** as *Active*, and a pull
    request's merge button offers only *Squash and merge* and *Rebase and
    merge*.
+3. *Settings* → *General* → *Pull Requests*: tick *Automatically delete
+   head branches*, so merged branches don't pile up.
 
 If you rename a job in `template.yml`, update its name under *Require
 status checks to pass* in **Protect main** on GitHub, or pull requests wait

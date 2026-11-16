@@ -707,18 +707,16 @@ serves all your repositories; skip this if you already have one.
      ruleset*.
   2. Select `.github/rulesets/main.json` from your local clone, then click
      *Create*.
-  3. Check: *Rulesets* now lists **Protect main** as *Active*.
+  3. Check: *Rulesets* now lists **Protect main** as *Active*, and the
+     merge button on a pull request offers only *Squash and merge* and
+     *Rebase and merge*.
 
   If a push to `main` was rejected because the ruleset was imported too
   early, set it to *Disabled*, push, and set it back to *Active*.
-- [ ] **Merge settings.** The ruleset rejects merge commits, but the merge
-  button keeps offering them until you turn them off. *Settings* →
-  *General* → *Pull Requests*:
-  1. Untick *Allow merge commits*. Leave *Allow squash merging* and *Allow
-     rebase merging* ticked.
-  2. Tick *Automatically delete head branches*.
-  3. Check: the merge button on a pull request offers only *Squash and
-     merge* and *Rebase and merge*.
+- [ ] **Delete merged branches automatically:** *Settings* → *General* →
+  *Pull Requests* → tick *Automatically delete head branches*. Release
+  branches rely on this: the next release starts by creating the branch
+  again.
 - [ ] **Connect the release bot:** install your app on the repository (app
   settings → *Install App*), then in *Settings* → *Secrets and variables* →
   *Actions* add the **variable** `RELEASE_APP_CLIENT_ID` (the Client ID) and
