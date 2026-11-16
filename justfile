@@ -1,5 +1,7 @@
 # Every check is a recipe here, and CI runs these same recipes.
-# Run `just` to list them.
+# Run `just` to list them. The comment line directly above a recipe is its
+# description in that list; put longer explanations above it, separated by
+# a blank line.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -93,9 +95,10 @@ doc-open:
 deny:
     cargo deny --locked check
 
-# Fail if the public API breaks compared with a git ref.
 # PRs don't bump the version, so semver-checks would assume a major release
 # and allow any break; `--release-type minor` makes it flag them.
+
+# Fail if the public API breaks compared with a git ref.
 semver baseline="origin/main":
     if git rev-parse --verify --quiet "{{ baseline }}^{commit}" >/dev/null; then \
         cargo semver-checks --baseline-rev "{{ baseline }}" --release-type minor; \
@@ -109,9 +112,10 @@ semver baseline="origin/main":
 miri:
     cargo +{{ nightly }} miri test --all-features
 
-# Run each fuzz target for the given number of seconds.
 # `--target` is the compiler's host: cargo-fuzz otherwise defaults to the
 # platform it was built for, which is musl for the prebuilt binary.
+
+# Run each fuzz target for the given number of seconds.
 fuzz seconds="60":
     host=$(rustc -vV | sed -n 's/^host: //p'); \
     for target in $(cargo +{{ nightly }} fuzz list); do \
