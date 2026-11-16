@@ -56,10 +56,10 @@ jobs:
       matrix:
         include:
           - variant: minimal
-            defines: -d uses_unsafe=false -d fuzzing=false -d benchmarks=false -d codecov=false
+            defines: -d uses_unsafe=false -d fuzzing=false -d benchmarks=false
             extras: "true"
           - variant: full
-            defines: -d uses_unsafe=true -d fuzzing=true -d benchmarks=true -d codecov=true
+            defines: -d uses_unsafe=true -d fuzzing=true -d benchmarks=true
             extras: just miri && just fuzz 10 && just bench --no-run
     steps:
       - name: Check out repository

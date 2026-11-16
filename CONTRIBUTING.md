@@ -198,11 +198,8 @@ configured, and how to change it.
 
 - **Shows:** which lines, functions and branches the tests exercise.
 - **Run:** `just cov`. It writes `target/lcov.info` (for editors and
-  coverage services) and prints a summary table. Doc tests aren't counted.
-- **In CI:** the summary appears on the run's summary page{% if codecov %}, and
-  the report is uploaded to Codecov when the `CODECOV_TOKEN` secret is set.
-  `codecov.yml` fails the Codecov status only if overall coverage drops by
-  more than 1%; coverage of the changed lines is informational{% endif %}.
+  other coverage tools) and prints a summary table. Doc tests aren't counted.
+- **In CI:** the summary appears on the run's summary page.
 
 ### Minimum supported Rust version (MSRV)
 
@@ -353,8 +350,7 @@ calling workflow, and GitHub and zizmor treat it as pinned.
 
 ### Details
 
-- **Coverage** writes its summary to the run's summary page{% if codecov %} and uploads
-  to Codecov when the `CODECOV_TOKEN` secret is set{% endif %}.
+- **Coverage** writes its summary to the run's summary page.
 - **semver** only runs on pull requests, comparing with the target branch.
   It isn't a required check (see [API compatibility](#api-compatibility-semver)).
 - **Scheduled** catches breakage that happens without any change here:
@@ -653,8 +649,7 @@ version pinned there, together with cargo-semver-checks at the version in
 | `.config/nextest.toml` | Test runner settings |
 | `lefthook.yml` | Git hook |
 | `release-plz.toml` | Release settings |
-| `renovate.json` | Dependency update rules |{% if codecov %}
-| `codecov.yml` | Codecov thresholds and pull request comments |{% endif %}
+| `renovate.json` | Dependency update rules |
 | `.vscode/` | Editor settings and recommended extensions |
 | `CHANGELOG.md` | Release history, written by release-plz |
 | `SECURITY.md` | How to report vulnerabilities |
