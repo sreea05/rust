@@ -1,5 +1,5 @@
 //! Fuzz `checked_add` with arbitrary pairs of numbers.
-//! Run with `just fuzz` or `cargo +nightly fuzz run checked_add`.
+//! Run with `just fuzz`. To reproduce a crash, see "Fuzzing" in CONTRIBUTING.md.
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
