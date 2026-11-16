@@ -107,21 +107,9 @@ semver baseline="origin/main":
     fi
 
 # --- Optional extras --------------------------------------------------------
+# Recipes for the options chosen when the project was generated. Each file
+# exists only if its option was chosen; `import?` skips missing files.
 
-# Run the tests under Miri to detect undefined behaviour.
-miri:
-    cargo +{{ nightly }} miri test --all-features
-
-# `--target` is the compiler's host: cargo-fuzz otherwise defaults to the
-# platform it was built for, which is musl for the prebuilt binary.
-
-# Run each fuzz target for the given number of seconds.
-fuzz seconds="60":
-    host=$(rustc -vV | sed -n 's/^host: //p'); \
-    for target in $(cargo +{{ nightly }} fuzz list); do \
-        cargo +{{ nightly }} fuzz run --target "$host" "$target" -- -max_total_time={{ seconds }}; \
-    done
-
-# Run benchmarks. Extra arguments go to cargo, e.g. `just bench -- --save-baseline main`.
-bench *args:
-    cargo bench --locked --all-features {{ args }}
+import? 'just/miri.just'
+import? 'just/fuzz.just'
+import? 'just/bench.just'

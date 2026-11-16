@@ -186,8 +186,10 @@ project version:
 
 `post-generate.rhai` does the renames. `cargo-generate.toml` defines the
 prompts, which files each "no" answer removes, and which files are copied
-without placeholder substitution (the workflows, `justfile` and
-`release-plz.toml` use `{{ }}` for their own syntax).
+without placeholder substitution (the workflows, `justfile`, `just/` and
+`release-plz.toml` use `{{ }}` for their own syntax). Because the `justfile`
+can't use `{% if %}`, the commands for each optional extra live in their
+own file in `just/`, which is removed with the option.
 
 ### Protecting `main`
 
@@ -206,7 +208,9 @@ the ruleset too.
   Tools table in `CONTRIBUTING.md`.
 - **Add a prompt:** add `[placeholders.<name>]` to `cargo-generate.toml`;
   use `{% if <name> %}` in files or a `[conditional.'!<name>']` section to
-  remove whole files; update the prompt table above; cover it in
+  remove whole files; put any commands it adds in `just/<name>.just`
+  (imported by the `justfile` with `import?`, so it can be removed);
+  update the prompt table above; cover it in
   `.github/workflows/template.yml` if it needs testing.
 - **Keep versions current:** install [Renovate](https://github.com/apps/renovate)
   on this repository. It updates the actions (including those in

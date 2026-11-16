@@ -3,7 +3,7 @@
 cargo_generate_version = ">=0.26.0"
 # Copied as-is, without placeholder substitution: these files use `{{ }}`
 # for their own syntax.
-exclude = [".github-project/workflows/**", "justfile", "release-plz.toml"]
+exclude = [".github-project/workflows/**", "justfile", "just/**", "release-plz.toml"]
 # The template repository's own files. The project's versions are stored
 # as README.project.md, LICENSE.project and .github-project/, and
 # post-generate.rhai moves them into place.
@@ -38,10 +38,10 @@ prompt = "Add criterion benchmarks?"
 default = true
 
 [conditional.'!uses_unsafe']
-ignore = [".github-project/workflows/miri.yml"]
+ignore = [".github-project/workflows/miri.yml", "just/miri.just"]
 
 [conditional.'!fuzzing']
-ignore = ["fuzz", ".github-project/workflows/fuzz.yml"]
+ignore = ["fuzz", ".github-project/workflows/fuzz.yml", "just/fuzz.just"]
 
 [conditional.'!benchmarks']
-ignore = ["benches"]
+ignore = ["benches", "just/bench.just"]

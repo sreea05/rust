@@ -102,8 +102,9 @@ Nothing is released by merging. Releases are a separate, deliberate step
 ## Commands
 
 Every check is a [`just`](https://just.systems) command defined in the
-`justfile`. CI runs these same commands, so the `justfile` is the single
-place where each command is written. Run `just` to list them.
+`justfile`{% if uses_unsafe or fuzzing or benchmarks %} (the commands for this project's optional extras are in
+`just/`, which the `justfile` imports){% endif %}. CI runs these same commands, so
+this is the single place where each command is written. Run `just` to list them.
 
 | Command | What it does |
 |---|---|
@@ -633,7 +634,8 @@ version pinned there, together with cargo-semver-checks at the version in
 |---|---|
 | `Cargo.toml` | Package metadata, MSRV (`rust-version`), lints, what's published (`include`), docs.rs build |
 | `rust-toolchain.toml` | Pinned stable toolchain and its components |
-| `justfile` | Every command |
+| `justfile` | Every command |{% if uses_unsafe or fuzzing or benchmarks %}
+| `just/` | Commands for the optional extras, imported by the `justfile` |{% endif %}
 | `.devcontainer/Dockerfile` | The development and CI image |
 | `.devcontainer/tools.toml` | Versions of every tool and the nightly toolchain |
 | `.devcontainer/install-tools.sh` | Installs the toolchains and tools into the image |
