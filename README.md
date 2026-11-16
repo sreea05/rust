@@ -183,13 +183,23 @@ project version:
 | `README.project.md` | `README.md` | The crate's README |
 | `LICENSE` | not copied | The template's license |
 | `LICENSE.project` | `LICENSE` | Filled in with the year and owner |
-| `.github/` | not copied | Tests the template |
+| `.github/` | not copied | Tests and protects the template |
 | `.github-project/` | `.github/` | Kept apart so GitHub doesn't run project workflows here |
 
 `post-generate.rhai` does the renames. `cargo-generate.toml` defines the
 prompts, which files each "no" answer removes, and which files are copied
 without placeholder substitution (the workflows, `justfile` and
 `release-plz.toml` use `{{ }}` for their own syntax).
+
+### Protecting `main`
+
+`.github/rulesets/main.json` applies the projects' rules to this repository:
+pull requests only, squash or rebase merges, and the **Template** workflow's
+checks (`workflow audit`, `minimal`, `full`) must pass. Import it once:
+*Settings* → *Rules* → *Rulesets* → *New ruleset* → *Import a ruleset*.
+Also untick *Allow merge commits* under *Settings* → *General* → *Pull
+Requests*. If you rename a job in `template.yml`, update the check names in
+the ruleset too.
 
 ### Making changes
 
